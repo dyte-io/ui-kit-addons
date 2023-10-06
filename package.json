@@ -1,0 +1,19 @@
+{
+  "name": "@dytesdk/ui-kit-addons",
+  "version": "1.0.1",
+  "description": "A collection of Dyte UI-kit addons",
+  "scripts": {
+    "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ",
+    "build:clean": "rm -rf ./dist",
+    "build": "tsc && npm run build:clean && npm run compile"
+  },
+  "author": "Dyte ",
+  "license": "ISC",
+  "peerDependencies": {
+    "@dytesdk/ui-kit": "^1.57.1"
+  },
+  "dependencies": {
+    "@dytesdk/video-background-transformer": "^1.1.4",
+    "typescript": "^5.2.2"
+  }
+}
