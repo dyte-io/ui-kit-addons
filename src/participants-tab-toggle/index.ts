@@ -5,7 +5,7 @@ import ActionToggle from "./ActionToggle";
 export interface ParticipantTabToggleArgs {
     position: "start" | "end";
     label: string;
-    initialValue?: boolean;
+    initialValue?: () => boolean;
     onEnabled: () => void;
     onDisabled: () => void;
     attributes?: { [key: string]: any };
@@ -17,17 +17,23 @@ export interface ParticipantTabToggleArgs {
  *
  * @param {string} args.position - The position of the button. Can be 'start' or 'end'.
  * @param {string} args.label - The label of the button.
- * @param {Function} args.onClick - The function to be called when the button is clicked.
+ * @param {string} args.label - Function to return the initial state, component might be removed from DOM and thus does not retain its state
+ * @param {Function} args.onEnabled - The function to be called when the toggle is checked
+ * @param {Function} args.onDisabled - The function to be called when the toggle is unchecked
  * @param {Object} args.attributes - The attributes to be added to the button.
  *
  * @returns {UIConfig} modified config
  *
  * @example
  *  action = new ParticipantTabAction({
- *     onClick: () => {
- *       alert('Clicked!');
+ *     onEnabled: () => {
+ *       alert('toggled true!');
+ *     },
+ *     onDisabled: () => {
+ *       alert('toggled true!');
  *     },
  *     label: 'Click me',
+ *     initialValue?: () => true;
  *     position: 'start',
  *   });
  *  pass the action to the addon register function
@@ -43,14 +49,16 @@ export default class ParticipantTabToggle {
 
     position = "start";
 
-    initialValue = false;
+    initialValue: () => boolean = () => false;
 
     constructor(args: ParticipantTabToggleArgs) {
         this.position = args.position;
         this.label = args.label;
         this.onEnabled = args.onEnabled;
         this.onDisabled = args.onDisabled;
-        this.initialValue = args.initialValue ?? false;
+        if(args.initialValue){
+            this.initialValue = args.initialValue
+        }
     }
 
     async unregister() {
@@ -79,7 +87,7 @@ export default class ParticipantTabToggle {
             slot: this.position,
             label: this.label,
             // @ts-ignore
-            state: this.initialValue,
+            initialValue: this.initialValue,
             // @ts-ignore
             onEnabled: this.onEnabled,
             // @ts-ignore

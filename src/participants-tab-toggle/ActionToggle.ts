@@ -1,6 +1,7 @@
 class ActionToggle extends HTMLElement {
     shadow;
     label = "Click me";
+    initialValue = () => false;
     state = false;
     onEnabled = () => {}
     onDisabled = () => {}
@@ -64,21 +65,6 @@ class ActionToggle extends HTMLElement {
             case "label":
                 this.label = newVal;
                 break
-            case "initialValue":
-                // @ts-ignore
-                this.state = newVal
-                console.log(this.shadow.querySelector("dyte-switch"));
-                // @ts-ignore
-                this.shadow.querySelector("dyte-switch").checked = newVal;
-                break;
-            case "onEnabled":
-                // @ts-ignore
-                this.onEnabled = newVal
-                break;
-            case "onDisabled":
-                // @ts-ignore
-                this.onDisabled = newVal
-                break;
         }
     }
 
@@ -94,6 +80,7 @@ class ActionToggle extends HTMLElement {
     create() {
         const container = this.createElement("div", "action-container");
         const button = this.createElement("dyte-switch", "action-switch") as HTMLDyteSwitchElement;
+        this.state = this.initialValue()
         button.checked = this.state;
         button.addEventListener("dyteChange", () => {
             if(button.checked == this.state)return;
