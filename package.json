@@ -27,6 +27,12 @@
       "require": "./dist/cjs/participants-tab-action/index.js",
       "default": "./dist/cjs/participants-tab-action/index.js",
       "types": "./dist/esm/participants-tab-action/index.d.ts"
+    },
+    "./participants-tab-toggle": {
+      "import": "./dist/esm/participants-tab-toggle/index.js",
+      "require": "./dist/cjs/participants-tab-toggle/index.js",
+      "default": "./dist/cjs/participants-tab-toggle/index.js",
+      "types": "./dist/esm/participants-tab-toggle/index.d.ts"
     }
   },
   "typesVersions": {
@@ -42,6 +48,9 @@
       ],
       "participants-tab-action": [
         "./dist/esm/participants-tab-action/index.d.ts"
+      ],
+      "participants-tab-toggle": [
+        "./dist/esm/participants-tab-toggle/index.d.ts"
       ]
     }
   },
@@ -56,14 +65,15 @@
   "author": "dyte Inc.",
   "license": "ISC",
   "peerDependencies": {
-    "@dytesdk/ui-kit": "^1.57.2"
+    "@dytesdk/ui-kit": "*"
   },
   "dependencies": {
-    "@dytesdk/video-background-transformer": "^1.1.4",
-    "typescript": "^5.2.2"
+    "@dytesdk/video-background-transformer": "^1.1.4"
   },
   "main": "index.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dyte-in/ui-kit-addons.git"

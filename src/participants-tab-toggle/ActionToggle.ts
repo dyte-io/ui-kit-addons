@@ -1,6 +1,9 @@
-class InviteAction extends HTMLElement {
+class ActionToggle extends HTMLElement {
     shadow;
     label = "Click me";
+    state = false;
+    onEnabled = () => {}
+    onDisabled = () => {}
 
     constructor() {
         super();
@@ -22,7 +25,7 @@ class InviteAction extends HTMLElement {
           flex-grow: 1;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
           width: 100%;
         }
 
@@ -54,11 +57,27 @@ class InviteAction extends HTMLElement {
     static get observedAttributes() {
         return ["label"];
     }
-    attributeChangedCallback(attr, oldVal, newVal) {
+    attributeChangedCallback(attr: any, oldVal: any, newVal: string) {
+        console.log(attr,newVal,oldVal);
         if (oldVal === newVal) return; // nothing to do
         switch (attr) {
             case "label":
                 this.label = newVal;
+                break
+            case "initialValue":
+                // @ts-ignore
+                this.state = newVal
+                console.log(this.shadow.querySelector("dyte-switch"));
+                // @ts-ignore
+                this.shadow.querySelector("dyte-switch").checked = newVal;
+                break;
+            case "onEnabled":
+                // @ts-ignore
+                this.onEnabled = newVal
+                break;
+            case "onDisabled":
+                // @ts-ignore
+                this.onDisabled = newVal
                 break;
         }
     }
@@ -74,11 +93,20 @@ class InviteAction extends HTMLElement {
 
     create() {
         const container = this.createElement("div", "action-container");
-        const button = this.createElement("button", "action-button");
-        button.innerText = this.label;
-        button.addEventListener("click", () => {
-            this.dispatchEvent(new CustomEvent("onClick", { bubbles: true }));
-        });
+        const button = this.createElement("dyte-switch", "action-switch") as HTMLDyteSwitchElement;
+        button.checked = this.state;
+        button.addEventListener("dyteChange", () => {
+            if(button.checked == this.state)return;
+            this.state = button.checked;
+            if(button.checked) {
+                this.onEnabled();
+            } 
+            if(!button.checked) 
+            {
+                this.onDisabled();
+            }
+        })
+        container.innerText = this.label;
         container.appendChild(button);
         this.shadow.appendChild(container);
     }
@@ -88,4 +116,4 @@ class InviteAction extends HTMLElement {
     }
 }
 
-export default InviteAction;
+export default ActionToggle;
