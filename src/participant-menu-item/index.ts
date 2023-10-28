@@ -8,6 +8,22 @@ interface ParticipantMenuItemArgs {
     onClick: () => void;
 }
 
+/**
+ * A class that represents a custom menu item in the participant menu.
+ * @class ParticipantMenuItem
+ * @example
+ * ```typescript
+ * const participantMenuItem = new ParticipantMenuItem({
+ *   label: "My Custom Menu Item",
+ *   icon: "<svg> </svg>",
+ *   onClick: () => {
+ *     console.log('Clicked on custom menu item');
+ *   }
+ * });
+ * 
+ * const config = registerAddons([participantMenuItem], meeting);
+ * ```
+ */
 export default class ParticipantMenuItem {
     meeting?: Meeting;
 
