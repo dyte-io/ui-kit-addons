@@ -3,8 +3,8 @@ class ActionToggle extends HTMLElement {
     label = "Click me";
     initialValue = () => false;
     state = false;
-    onEnabled = () => {}
-    onDisabled = () => {}
+    onEnabled = () => {};
+    onDisabled = () => {};
 
     constructor() {
         super();
@@ -58,13 +58,13 @@ class ActionToggle extends HTMLElement {
     static get observedAttributes() {
         return ["label"];
     }
+
     attributeChangedCallback(attr: any, oldVal: any, newVal: string) {
-        console.log(attr,newVal,oldVal);
         if (oldVal === newVal) return; // nothing to do
         switch (attr) {
             case "label":
                 this.label = newVal;
-                break
+                break;
         }
     }
 
@@ -79,20 +79,22 @@ class ActionToggle extends HTMLElement {
 
     create() {
         const container = this.createElement("div", "action-container");
-        const button = this.createElement("dyte-switch", "action-switch") as HTMLDyteSwitchElement;
-        this.state = this.initialValue()
+        const button = this.createElement(
+            "dyte-switch",
+            "action-switch"
+        ) as HTMLDyteSwitchElement;
+        this.state = this.initialValue();
         button.checked = this.state;
         button.addEventListener("dyteChange", () => {
-            if(button.checked == this.state)return;
+            if (button.checked == this.state) return;
             this.state = button.checked;
-            if(button.checked) {
+            if (button.checked) {
                 this.onEnabled();
-            } 
-            if(!button.checked) 
-            {
+            }
+            if (!button.checked) {
                 this.onDisabled();
             }
-        })
+        });
         container.innerText = this.label;
         container.appendChild(button);
         this.shadow.appendChild(container);

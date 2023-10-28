@@ -3,15 +3,15 @@ import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteToggle from "../participants-tab-toggle";
 
 export interface ChatHostToggleArgs {
-    hostPresets: string[]
-    targetPresets: string[]
+    hostPresets: string[];
+    targetPresets: string[];
 }
 
 /**
  * This class is used to add a public chat enable / disable host control
  *
  * @param {Array} args.hostPresets - The host presets who can trigger this control
- * 
+ *
  * @param {Array} args.targetPresets - The presets whose chat will controlled
  *
  * @returns {UIConfig} modified config
@@ -26,9 +26,9 @@ export interface ChatHostToggleArgs {
 export default class ChatHostToggle {
     meeting?: Meeting;
 
-    hostPresets: string[]
+    hostPresets: string[];
 
-    targetPresets: string[]
+    targetPresets: string[];
 
     sendTimeout: any;
 
@@ -40,22 +40,28 @@ export default class ChatHostToggle {
         initialValue: () => this.state,
         onEnabled: () => {
             this.state = true;
-            if(this.sendTimeout) {
+            if (this.sendTimeout) {
                 clearInterval(this.sendTimeout);
             }
             this.targetPresets.forEach((p) => {
-                this.meeting?.participants.broadcastMessage("chatPermissionUpdate", { targetPreset: p, canSend: true })
-            })
+                this.meeting?.participants.broadcastMessage(
+                    "chatPermissionUpdate",
+                    { targetPreset: p, canSend: true }
+                );
+            });
         },
         onDisabled: () => {
             this.state = false;
-            if(this.sendTimeout) {
+            if (this.sendTimeout) {
                 clearInterval(this.sendTimeout);
             }
             const disableChat = () => {
                 this.targetPresets.forEach((p) => {
-                    this.meeting?.participants.broadcastMessage("chatPermissionUpdate", { targetPreset: p, canSend: false })
-                })
+                    this.meeting?.participants.broadcastMessage(
+                        "chatPermissionUpdate",
+                        { targetPreset: p, canSend: false }
+                    );
+                });
             };
             this.sendTimeout = setInterval(disableChat, 5000);
             disableChat();
@@ -63,24 +69,38 @@ export default class ChatHostToggle {
     });
 
     constructor(args: ChatHostToggleArgs) {
-        this.targetPresets = args.targetPresets
-        this.hostPresets = args.hostPresets
-        
+        this.targetPresets = args.targetPresets;
+        this.hostPresets = args.hostPresets;
     }
 
-    onBroadcastMessage({ type, payload }: { type: string, payload: any}) {
-        if(type === "chatPermissionUpdate" && payload.targetPreset === this.meeting?.self.presetName) {
+    onBroadcastMessage({ type, payload }: { type: string; payload: any }) {
+        if (
+            type === "chatPermissionUpdate" &&
+            payload.targetPreset === this.meeting?.self.presetName
+        ) {
             const state = payload.canSend;
-            Object.defineProperty(this.meeting?.self.permissions.chatPublic, 'canSend', {
-                value: state
-            })
-            Object.defineProperty(this.meeting?.self.permissions.chatPublic, 'text', {
-                value: state
-            })
-            Object.defineProperty(this.meeting?.self.permissions.chatPublic, 'files', {
-                value: state
-            })
-            this.meeting?.self.permissions.emit('*')
+            Object.defineProperty(
+                this.meeting?.self.permissions.chatPublic,
+                "canSend",
+                {
+                    value: state
+                }
+            );
+            Object.defineProperty(
+                this.meeting?.self.permissions.chatPublic,
+                "text",
+                {
+                    value: state
+                }
+            );
+            Object.defineProperty(
+                this.meeting?.self.permissions.chatPublic,
+                "files",
+                {
+                    value: state
+                }
+            );
+            this.meeting?.self.permissions.emit("*");
         }
     }
 
@@ -90,10 +110,13 @@ export default class ChatHostToggle {
 
     register(config: UIConfig, meeting: Meeting) {
         this.meeting = meeting;
-        meeting.participants.on("broadcastedMessage", this.onBroadcastMessage.bind(this))
-        if(this.hostPresets.includes(meeting.self.presetName)) {
-            return this.button.register(config, meeting)
+        meeting.participants.on(
+            "broadcastedMessage",
+            this.onBroadcastMessage.bind(this)
+        );
+        if (this.hostPresets.includes(meeting.self.presetName)) {
+            return this.button.register(config, meeting);
         }
-        return  config;
+        return config;
     }
 }
