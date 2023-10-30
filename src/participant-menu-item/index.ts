@@ -5,7 +5,8 @@ import CustomMenuItem from "./CustomMenuItem";
 interface ParticipantMenuItemArgs {
     label: string;
     icon?: string;
-    onClick: () => void;
+    onClick: (participantId: string) => void;
+    onStateChange: (participantId: string, callback: (state: { label: string, icon: string, class: string }) => void) => void;
 }
 
 /**
@@ -27,16 +28,19 @@ interface ParticipantMenuItemArgs {
 export default class ParticipantMenuItem {
     meeting?: Meeting;
 
-    onClick: () => void;
+    onClick: (participantId: string) => void;
 
     label: string;
 
     icon?: string;
 
+    onStateChange: (participantId: string, callback: (state: { label: string, icon: string, class: string }) => void) => void;
+
     constructor(args: ParticipantMenuItemArgs) {
         this.label = args.label;
         this.icon = args.icon;
         this.onClick = args.onClick;
+        this.onStateChange = args.onStateChange;
     }
 
     async unregister() {
@@ -53,15 +57,17 @@ export default class ParticipantMenuItem {
 
         this.meeting = meeting;
         if (!config.root["dyte-participant"]) {
-            config.root["dyte-participant"] = [];
+            config.root["dyte-participant"] = {};
         }
 
         // Add buttons with config
         const builder = new DyteUIBuilder(config);
-        const participants = builder.find(`dyte-participant`);
-        participants.add("dyte-custom-menu-item", {
+        const dyteParticipant = builder.find(`dyte-participant`);
+        dyteParticipant.add("dyte-custom-menu-item", {
             label: this.label,
             icon: this.icon,
+            // @ts-ignore
+            onStateChange: this.onStateChange,
             // @ts-ignore
             onClick: this.onClick
         });
