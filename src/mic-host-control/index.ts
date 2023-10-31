@@ -1,4 +1,4 @@
-import { UIConfig } from "@dytesdk/ui-kit";
+import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
 import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
@@ -18,7 +18,7 @@ declare global {
     }
 }
 
-export interface ChatHostToggleArgs {
+export interface MicHostToggleArgs {
     hostPresets: string[];
     targetPresets: string[];
 }
@@ -32,21 +32,12 @@ window.DyteMicHostControlAddon = {
     pubsub: undefined
 };
 
-function updateBlockedParticipants(state: boolean, participantId?: string) {
-    if (participantId) {
-        window.DyteMicHostControlAddon.overrides[participantId] = state;
-    } else {
-        window.DyteMicHostControlAddon.blockAll = state;
-    }
-    window.DyteChatHostControlAddon.pubsub.publish('micPermissionUpdate', {});
-}
-
 /**
  * This class is used to add a microphone enable / disable host control
  *
  * @param {Array} args.hostPresets - The host presets who can trigger this control
  *
- * @param {Array} args.targetPresets - The presets whose chat will controlled
+ * @param {Array} args.targetPresets - The presets whose mic will controlled
  *
  * @returns {UIConfig} modified config
  *
@@ -83,7 +74,7 @@ export default class MicHostToggle {
                     { targetPreset: p, canProduce: "ALLOWED" }
                 );
             });
-            updateBlockedParticipants(this.state);
+            this.updateBlockedParticipants(this.state);
         },
         onDisabled: () => {
             this.state = false;
@@ -98,9 +89,9 @@ export default class MicHostToggle {
                     );
                 });
             };
-            this.sendTimeout = setInterval(disableMic, 5000);
+            this.sendTimeout = setInterval(disableMic, 2000);
             disableMic();
-            updateBlockedParticipants(this.state);
+            this.updateBlockedParticipants(this.state);
         }
     });
 
@@ -108,7 +99,7 @@ export default class MicHostToggle {
         label: "Disable Mic",
         icon: micOffIcon,
         onStateChange: (participantId, callback) => {
-            return window.DyteChatHostControlAddon.pubsub?.subscribe(
+            return window.DyteMicHostControlAddon.pubsub?.subscribe(
                 'micPermissionUpdate',
                 () => {
                     const isBlocked = this.isParticipantBlocked(participantId);
@@ -127,13 +118,14 @@ export default class MicHostToggle {
                 canProduce: isBlocked ? "ALLOWED" : "NOT_ALLOWED"
             });
             // toggle the state
-            updateBlockedParticipants(!isBlocked, participantId);
+            this.updateBlockedParticipants(!isBlocked, participantId);
         }
     });
 
-    constructor(args: ChatHostToggleArgs) {
+    constructor(args: MicHostToggleArgs) {
         this.targetPresets = args.targetPresets;
         this.hostPresets = args.hostPresets;
+        window.DyteMicHostControlAddon.pubsub = new PubSub();
     }
 
     // if overrides are present, and the participant is not blocked, return false
@@ -142,12 +134,22 @@ export default class MicHostToggle {
     // if overrides are not present, and blockAll is false, return false
     isParticipantBlocked(participantId: string) {
         if (window.DyteMicHostControlAddon.overrides[participantId] !== undefined) {
-            return !window.DyteMicHostControlAddon.overrides[participantId];
+            return window.DyteMicHostControlAddon.overrides[participantId];
         }
         return window.DyteMicHostControlAddon.blockAll;
     }
 
+    updateBlockedParticipants(state: boolean, participantId?: string) {
+        if (participantId) {
+            window.DyteMicHostControlAddon.overrides[participantId] = state;
+        } else {
+            window.DyteMicHostControlAddon.blockAll = state;
+        }
+        window.DyteMicHostControlAddon.pubsub.publish('micPermissionUpdate', {});
+    }
+
     onBroadcastMessage({ type, payload }: { type: string; payload: any }) {
+        console.log("onBroadcastMessage", type, payload);
         if (
             type === "micPermissionUpdate" &&
             (payload.targetPreset === this.meeting?.self.presetName ||
@@ -175,7 +177,7 @@ export default class MicHostToggle {
         );
     }
 
-    register(config: UIConfig, meeting: Meeting) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
         this.meeting = meeting;
         meeting.participants.on(
             "broadcastedMessage",
@@ -183,10 +185,8 @@ export default class MicHostToggle {
         );
 
         if (this.hostPresets.includes(meeting.self.presetName)) {
-            return this.menuItem.register(
-                this.button.register(config, meeting),
-                meeting
-            );
+            config = this.button.register(config, meeting, () => getBuilder(config));
+            return this.menuItem.register(config, meeting, () => getBuilder(config));
         }
 
         return config;

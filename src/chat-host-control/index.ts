@@ -184,17 +184,15 @@ export default class ChatHostToggle {
         // TODO: Remove the changer from the body
     }
 
-    register(config: UIConfig, meeting: Meeting) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
         this.meeting = meeting;
         meeting.participants.on(
             "broadcastedMessage",
             this.onBroadcastMessage.bind(this)
         );
         if (this.hostPresets.includes(meeting.self.presetName)) {
-            return this.menuItem.register(
-                this.button.register(config, meeting),
-                meeting
-            );
+            config = this.button.register(config, meeting, () => getBuilder(config));
+            return this.menuItem.register(config, meeting , () => getBuilder(config));
         }
 
         return config;

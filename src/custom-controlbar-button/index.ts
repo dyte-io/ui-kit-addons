@@ -45,10 +45,10 @@ export default class CustomControlbarButton {
         });
     }
 
-    register(config: UIConfig, meeting: Meeting) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
         this.meeting = meeting;
         // Add buttons with config
-        const builder = new DyteUIBuilder(config);
+        const builder = getBuilder(config);
         const controlBar = builder.find(`div#controlbar-${this.position}`);
         if (!controlBar) return config;
         this.addControlBarButton(controlBar, this.attributes);

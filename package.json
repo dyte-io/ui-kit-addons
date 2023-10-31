@@ -1,6 +1,6 @@
 {
   "name": "@dytesdk/ui-kit-addons",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "A collection of Dyte UI-kit addons",
   "type": "module",
   "exports": {
@@ -91,15 +91,13 @@
   },
   "author": "dyte Inc.",
   "license": "ISC",
-  "peerDependencies": {
-    "@dytesdk/ui-kit": "*"
-  },
   "dependencies": {
     "@dytesdk/video-background-transformer": "^1.1.4"
   },
   "main": "index.js",
   "devDependencies": {
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "@dytesdk/ui-kit": "latest"
   },
   "repository": {
     "type": "git",
