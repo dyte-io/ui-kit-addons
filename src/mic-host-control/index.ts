@@ -1,4 +1,4 @@
-import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
+import { UIConfig } from "@dytesdk/ui-kit";
 import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
@@ -149,7 +149,6 @@ export default class MicHostToggle {
     }
 
     onBroadcastMessage({ type, payload }: { type: string; payload: any }) {
-        console.log("onBroadcastMessage", type, payload);
         if (
             type === "micPermissionUpdate" &&
             (payload.targetPreset === this.meeting?.self.presetName ||
@@ -177,7 +176,7 @@ export default class MicHostToggle {
         );
     }
 
-    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
         this.meeting = meeting;
         meeting.participants.on(
             "broadcastedMessage",
@@ -186,7 +185,7 @@ export default class MicHostToggle {
 
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));
-            return this.menuItem.register(config, meeting, () => getBuilder(config));
+            // return this.menuItem.register(config, meeting, () => getBuilder(config));
         }
 
         return config;

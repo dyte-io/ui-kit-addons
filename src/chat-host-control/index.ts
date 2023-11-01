@@ -192,7 +192,7 @@ export default class ChatHostToggle {
         );
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));
-            return this.menuItem.register(config, meeting , () => getBuilder(config));
+            // return this.menuItem.register(config, meeting , () => getBuilder(config));
         }
 
         return config;
