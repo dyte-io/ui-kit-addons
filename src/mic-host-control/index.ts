@@ -74,7 +74,7 @@ export default class MicHostToggle {
                     { targetPreset: p, canProduce: "ALLOWED" }
                 );
             });
-            this.updateBlockedParticipants(this.state);
+            this.updateBlockedParticipants(!this.state);
         },
         onDisabled: () => {
             this.state = false;
@@ -91,7 +91,7 @@ export default class MicHostToggle {
             };
             this.sendTimeout = setInterval(disableMic, 2000);
             disableMic();
-            this.updateBlockedParticipants(this.state);
+            this.updateBlockedParticipants(!this.state);
         }
     });
 

@@ -1,6 +1,6 @@
 {
   "name": "@dytesdk/ui-kit-addons",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A collection of Dyte UI-kit addons",
   "type": "module",
   "exports": {
@@ -86,8 +86,7 @@
   ],
   "scripts": {
     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
-    "build:clean": "rm -rf ./dist",
-    "build": "tsc && npm run build:clean && npm run compile"
+    "build": "vite build && npm run compile"
   },
   "author": "dyte Inc.",
   "license": "ISC",
@@ -97,7 +96,8 @@
   "main": "index.js",
   "devDependencies": {
     "typescript": "^5.2.2",
-    "@dytesdk/ui-kit": "latest"
+    "@dytesdk/ui-kit": "latest",
+    "vite": "^4.4.8"
   },
   "repository": {
     "type": "git",

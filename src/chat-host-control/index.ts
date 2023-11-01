@@ -73,7 +73,7 @@ export default class ChatHostToggle {
                     { targetPreset: p, canSend: true }
                 );
             });
-            this.updateBlockedParticipants(this.state);
+            this.updateBlockedParticipants(!this.state);
         },
         onDisabled: () => {
             this.state = false;
@@ -90,7 +90,7 @@ export default class ChatHostToggle {
             };
             this.sendTimeout = setInterval(disableChat, 5000);
             disableChat();
-            this.updateBlockedParticipants(this.state);
+            this.updateBlockedParticipants(!this.state);
         }
     });
 
