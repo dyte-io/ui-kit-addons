@@ -65,7 +65,7 @@ export default class ParticipantTabToggle {
         // TODO: Remove the changer from the body
     }
 
-    register(config: UIConfig, meeting: Meeting) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
         if (!customElements.get("participant-tab-toggle")) {
             customElements.define(
                 "participant-tab-toggle",
@@ -81,7 +81,7 @@ export default class ParticipantTabToggle {
         }
 
         // Add buttons with config
-        const builder = new DyteUIBuilder(config);
+        const builder = getBuilder(config);
         const participants = builder.find(`dyte-participants`);
         participants?.add("participant-tab-toggle", {
             slot: this.position,

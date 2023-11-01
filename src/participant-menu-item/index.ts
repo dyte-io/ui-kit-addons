@@ -47,7 +47,7 @@ export default class ParticipantMenuItem {
         return;
     }
 
-    register(config: UIConfig, meeting: Meeting) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
         if (!customElements.get("dyte-custom-menu-item")) {
             customElements.define(
                 "dyte-custom-menu-item",
@@ -61,7 +61,7 @@ export default class ParticipantMenuItem {
         }
 
         // Add buttons with config
-        const builder = new DyteUIBuilder(config);
+        const builder = getBuilder(config);
         const dyteParticipant = builder.find(`dyte-participant`);
         dyteParticipant.add("dyte-custom-menu-item", {
             label: this.label,

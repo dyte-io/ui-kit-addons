@@ -105,7 +105,7 @@ export default class VideoBGAddon {
         });
     }
 
-    register(config: UIConfig, meeting: Meeting) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
         if (!DyteVideoBackgroundTransformer.isSupported()) return config;
 
         this.meeting = meeting;
@@ -151,7 +151,7 @@ export default class VideoBGAddon {
         });
 
         // Add buttons with config
-        const builder = new DyteUIBuilder(config);
+        const builder = getBuilder(config);
         const controlBar = builder.find("div#controlbar-center");
         if (!controlBar) return config;
         this.addControlBarButton(controlBar, {});

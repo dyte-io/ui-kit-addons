@@ -56,8 +56,8 @@ class HandRaiseAddon {
         window.DyteHandRaiseAddon.pubsub = new PubSub();
     }
 
-    register(config: UIConfig, meeting: Meeting) {
-        const builder = new DyteUIBuilder(config);
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
+        const builder = getBuilder(config);
 
         const participants = builder.find(`dyte-participants`);
 
