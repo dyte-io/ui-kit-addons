@@ -1,7 +1,8 @@
-interface MenuState { 
-    label: string;
-    icon: string;
-    class: string;
+export interface MenuState {
+	label: string;
+	icon?: string;
+	iconClass?: string;
+	labelClass?: string;
 }
 
 export default class CustomMenuItem extends HTMLElement {
@@ -10,8 +11,9 @@ export default class CustomMenuItem extends HTMLElement {
     state = {
         label: null,
         icon: null,
-        class: null
-    };
+        iconClass: null,
+	    labelClass: null,
+    } as MenuState;
 
     icon: string = '';
 
@@ -63,11 +65,15 @@ export default class CustomMenuItem extends HTMLElement {
         if (this.icon || this.state.icon) {
             const icon = document.createElement("dyte-icon");
             icon.setAttribute("icon", this.state.icon || this.icon);
-            icon.className = this.state.class || "red-icon";
+            icon.className = this.state.iconClass || "red-icon";
             icon.setAttribute("size", "md");
             icon.setAttribute("slot", "start");
             container.appendChild(icon);
         }
+
+        if (this.state.labelClass) {
+			container.className = this.state.labelClass;
+		}
 
         const textNode = document.createTextNode(this.state.label ?? this.label);
         container.appendChild(textNode);

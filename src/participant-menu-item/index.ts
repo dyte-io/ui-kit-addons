@@ -1,12 +1,13 @@
 import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
 import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
-import CustomMenuItem from "./CustomMenuItem";
+import CustomMenuItem, { MenuState } from "./CustomMenuItem";
 
 interface ParticipantMenuItemArgs {
     label: string;
     icon?: string;
+    show?: () => boolean;
     onClick: (participantId: string) => void;
-    onStateChange: (participantId: string, callback: (state: { label: string, icon: string, class: string }) => void) => void;
+    onStateChange: (participantId: string, callback: (state: MenuState) => void) => void;
 }
 
 /**
@@ -21,7 +22,7 @@ interface ParticipantMenuItemArgs {
  *     console.log('Clicked on custom menu item');
  *   }
  * });
- * 
+ *
  * const config = registerAddons([participantMenuItem], meeting);
  * ```
  */
@@ -34,7 +35,7 @@ export default class ParticipantMenuItem {
 
     icon?: string;
 
-    onStateChange: (participantId: string, callback: (state: { label: string, icon: string, class: string }) => void) => void;
+    onStateChange: (participantId: string, callback: (state: MenuState) => void) => void;
 
     constructor(args: ParticipantMenuItemArgs) {
         this.label = args.label;
