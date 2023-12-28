@@ -106,7 +106,7 @@ export default class MicHostToggle {
                     callback({
                         label: isBlocked ? "Enable Mic" : "Disable Mic",
                         icon: isBlocked ? micOnIcon : micOffIcon,
-                        class: isBlocked ? "" : "red-icon"
+                        iconClass: isBlocked ? "" : "red-icon"
                     });
                 });
         },

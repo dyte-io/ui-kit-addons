@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"
+        />
+        <title>Dyte UI Kit Addons</title>
+        <script src="https://cdn.dyte.in/core/dyte-1.20.0.js"></script>
+        <script type="module">
+            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@latest/loader/index.es2017.js";
+            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@latest/dist/esm/index.js";
+
+            // Import addons
+            import DyteVideoBackground from "/src/video-background/index.ts";
+            import ParticipantsTabAction from "/src/participants-tab-action/index.ts";
+            import HandRaise from "/src/hand-raise/index.ts";
+
+            // set global variables
+            window.addons = {
+                DyteVideoBackground,
+                ParticipantsTabAction,
+                HandRaise
+            };
+
+            defineCustomElements();
+            window.registerAddons = registerAddons;
+            window.DyteClient = DyteClient;
+        </script>
+    </head>
+    <body>
+        <div id="root">
+            <dyte-meeting id="meeting"></dyte-meeting>
+        </div>
+        <script>
+            window.onload = async function () {
+                const meetingRef = document.getElementById("meeting");
+                const url = new URL(window.location.href);
+                const authToken = url.searchParams.get("authToken");
+                if (!authToken) {
+                    alert("Please provide an authToken in the URL");
+                    return;
+                }
+
+                // set global variables
+                const {
+                    DyteVideoBackground,
+                    ParticipantsTabAction,
+                    HandRaise
+                } = window.addons;
+
+                const videoBackground = new DyteVideoBackground({
+                    modes: ["blur", "virtual"],
+                    images: [
+                        "https://images.unsplash.com/photo-1487088678257-3a541e6e3922?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3",
+                        "https://images.unsplash.com/photo-1496715976403-7e36dc43f17b?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3",
+                        "https://images.unsplash.com/photo-1600431521340-491eca880813?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3"
+                    ]
+                });
+
+                const tabAction = new ParticipantsTabAction({
+                    onClick: () => {
+                        alert("Clicked!");
+                    },
+                    label: "Click me",
+                    position: "start"
+                });
+
+                const handRaise = new HandRaise({
+                    canRaiseHand: true,
+                    canManageRaisedHand: true
+                });
+
+                const meeting = await DyteClient.init({ authToken });
+                const config = window.registerAddons(
+                    [videoBackground, tabAction, handRaise],
+                    meeting
+                );
+                meetingRef.meeting = meeting;
+                meetingRef.config = config;
+            };
+        </script>
+    </body>
+</html>

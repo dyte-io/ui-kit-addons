@@ -105,7 +105,7 @@ export default class ChatHostToggle {
                     callback({
                         label: isBlocked ? "Enable Chat": "Disable Chat",
                         icon: isBlocked ? chatOnIcon : chatOffIcon,
-                        class: isBlocked ? "" : "red-icon"
+                        iconClass: isBlocked ? "" : "red-icon"
                     });
                 });
         },
