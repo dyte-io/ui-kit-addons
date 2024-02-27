@@ -4,6 +4,9 @@ import DyteVideoBackgroundTransformer from "@dytesdk/video-background-transforme
 import type { BackgroundMode } from "./BackgroundChanger";
 import { BackgroundChanger } from "./BackgroundChanger";
 
+let transform: DyteVideoBackgroundTransformer | null = null;
+let initInProgress = false;
+
 export interface VideoBGAddonArgs {
     images?: string[];
     modes?: BackgroundMode[];
@@ -30,7 +33,6 @@ export default class VideoBGAddon {
     randomCount: number;
     modes: BackgroundMode[];
     meeting: Meeting | null = null;
-    transform: DyteVideoBackgroundTransformer | null = null;
     middleware: any;
 
     constructor(args?: VideoBGAddonArgs) {
@@ -64,9 +66,10 @@ export default class VideoBGAddon {
     }
 
     async addVideoVirtualBackground() {
-        if (!this.meeting || !this.transform) return;
+        if (!this.meeting || !transform) return;
+
         this.middleware =
-            await this.transform.createStaticBackgroundVideoMiddleware(
+            await transform.createStaticBackgroundVideoMiddleware(
                 this.images[0]
             );
         await this.meeting.self.addVideoMiddleware(this.middleware);
@@ -110,6 +113,12 @@ export default class VideoBGAddon {
 
         this.meeting = meeting;
 
+        const elements = document.getElementsByTagName("dyte-background-changer")
+        if (elements[0]) {
+            // remove dyte-background-changer
+            elements[0].remove();
+        }
+
         const changer = document.createElement("dyte-background-changer");
         // @ts-ignore
         changer.images = this.images;
@@ -125,17 +134,17 @@ export default class VideoBGAddon {
         changer.modes = this.modes;
         // @ts-ignore
         changer.onChange = async (mode: BackgroundMode, image?: string) => {
-            if (!this.meeting || !this.transform) return;
+            if (!this.meeting || !transform) return;
             if (this.middleware) {
                 await this.removeVideoVirtualBackground();
             }
             if (mode === "blur") {
                 this.middleware =
-                    await this.transform.createBackgroundBlurVideoMiddleware();
+                    await transform.createBackgroundBlurVideoMiddleware();
                 await this.meeting.self.addVideoMiddleware(this.middleware);
             } else if (mode === "virtual" && image) {
                 this.middleware =
-                    await this.transform.createStaticBackgroundVideoMiddleware(
+                    await transform.createStaticBackgroundVideoMiddleware(
                         image
                     );
                 this.meeting.self.addVideoMiddleware(this.middleware);
@@ -146,9 +155,12 @@ export default class VideoBGAddon {
         document.body.appendChild(changer);
 
         // Initialize the transformer
-        DyteVideoBackgroundTransformer.init().then((transform) => {
-            this.transform = transform;
-        });
+        if (!transform && !initInProgress) {
+            initInProgress = true;
+            DyteVideoBackgroundTransformer.init().then((_transform) => {
+                transform = _transform;
+            });
+        }
 
         // Add buttons with config
         const builder = getBuilder(config);
