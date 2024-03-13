@@ -11,6 +11,7 @@ export interface VideoBGAddonArgs {
     images?: string[];
     modes?: BackgroundMode[];
     randomCount?: number;
+    selector?: string;
 }
 
 // svg string of effects icon
@@ -34,6 +35,7 @@ export default class VideoBGAddon {
     modes: BackgroundMode[];
     meeting: Meeting | null = null;
     middleware: any;
+    selector?: string;
 
     constructor(args?: VideoBGAddonArgs) {
         this.images = args?.images ?? [];
@@ -42,6 +44,9 @@ export default class VideoBGAddon {
                 ? args.modes
                 : ["blur", "virtual", "random"];
         this.randomCount = args?.randomCount ?? 8;
+        if (args.selector) {
+            this.selector = args.selector;
+        }
         if (customElements.get("dyte-background-changer")) return;
         customElements.define("dyte-background-changer", BackgroundChanger);
     }
@@ -151,8 +156,15 @@ export default class VideoBGAddon {
             }
         };
 
-        // Add the changer to the body
-        document.body.appendChild(changer);
+        if (this.selector) {
+            const el = document.querySelector(this.selector)
+            if (el) {
+                el.appendChild(changer);
+            }
+        } else {
+            // Add the changer to the body
+            document.body.appendChild(changer);
+        }
 
         // Initialize the transformer
         if (!transform && !initInProgress) {
