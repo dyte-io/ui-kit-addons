@@ -5,7 +5,7 @@ import CustomMenuItem, { MenuState } from "./CustomMenuItem";
 interface ParticipantMenuItemArgs {
     label: string;
     icon?: string;
-    show?: () => boolean;
+    styles?: string;
     onClick: (participantId: string) => void;
     onStateChange: (participantId: string, callback: (state: MenuState) => void) => void;
 }
@@ -18,6 +18,7 @@ interface ParticipantMenuItemArgs {
  * const participantMenuItem = new ParticipantMenuItem({
  *   label: "My Custom Menu Item",
  *   icon: "<svg> </svg>",
+ *   styles: ".customClass { color: red; }",
  *   onClick: () => {
  *     console.log('Clicked on custom menu item');
  *   }
@@ -35,11 +36,14 @@ export default class ParticipantMenuItem {
 
     icon?: string;
 
+    styles?: string;
+
     onStateChange: (participantId: string, callback: (state: MenuState) => void) => void;
 
     constructor(args: ParticipantMenuItemArgs) {
         this.label = args.label;
         this.icon = args.icon;
+        this.styles = args.styles;
         this.onClick = args.onClick;
         this.onStateChange = args.onStateChange;
     }
@@ -67,6 +71,7 @@ export default class ParticipantMenuItem {
         dyteParticipant.add("dyte-custom-menu-item", {
             label: this.label,
             icon: this.icon,
+            styles: this.styles,
             // @ts-ignore
             onStateChange: this.onStateChange,
             // @ts-ignore

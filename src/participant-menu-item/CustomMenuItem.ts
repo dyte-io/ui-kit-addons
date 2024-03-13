@@ -1,8 +1,8 @@
 export interface MenuState {
-	label: string;
-	icon?: string;
-	iconClass?: string;
-	labelClass?: string;
+    label: string;
+    icon?: string;
+    iconClass?: string;
+    labelClass?: string;
 }
 
 export default class CustomMenuItem extends HTMLElement {
@@ -12,18 +12,20 @@ export default class CustomMenuItem extends HTMLElement {
         label: null,
         icon: null,
         iconClass: null,
-	    labelClass: null,
+        labelClass: null,
     } as MenuState;
 
     icon: string = '';
 
     label: string;
 
+    styles: string;
+
     participant: any;
 
     _onClick: (participantId: string) => void;
 
-    _onStateChange: (participantId: string, callback: (state: MenuState) => void ) => void;
+    _onStateChange: (participantId: string, callback: (state: MenuState) => void) => void;
 
     constructor() {
         super();
@@ -47,7 +49,7 @@ export default class CustomMenuItem extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["label", "icon"];
+        return ["label", "icon", "styles"];
     }
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
@@ -58,6 +60,17 @@ export default class CustomMenuItem extends HTMLElement {
         if (name === "icon") {
             this.icon = newValue;
         }
+        if (name === "styles") {
+            this.styles = newValue;
+        }
+    }
+
+    createStyles() {
+        if (!this.styles || this.styles.length === 0) return;
+
+        const styleEl = document.createElement("style");
+        styleEl.innerHTML = this.styles;
+        this.shadow.appendChild(styleEl);
     }
 
     updateLabel(container: any) {
@@ -72,8 +85,8 @@ export default class CustomMenuItem extends HTMLElement {
         }
 
         if (this.state.labelClass) {
-			container.className = this.state.labelClass;
-		}
+            container.className = this.state.labelClass;
+        }
 
         const textNode = document.createTextNode(this.state.label ?? this.label);
         container.appendChild(textNode);
@@ -85,7 +98,7 @@ export default class CustomMenuItem extends HTMLElement {
             if (this.participant) {
                 this._onClick(this.participant.id);
             }
-        }
+        };
         this.updateLabel(container);
         this.onStateChange(this.participant.id, (state) => {
             this.state = state;
@@ -97,5 +110,6 @@ export default class CustomMenuItem extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        this.createStyles();
     }
 }
