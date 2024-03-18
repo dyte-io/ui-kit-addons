@@ -5,51 +5,51 @@
   "type": "module",
   "exports": {
     "./custom-controlbar-button": {
-      "import": "./dist/esm/custom-controlbar-button/index.js",
-      "require": "./dist/cjs/custom-controlbar-button/index.js",
-      "default": "./dist/cjs/custom-controlbar-button/index.js",
+      "import": "./dist/custom-controlbar-button.js",
+      "require": "./dist/custom-controlbar-button.cjs",
+      "default": "./dist/custom-controlbar-button.cjs",
       "types": "./dist/esm/custom-controlbar-button/index.d.ts"
     },
     "./hand-raise": {
-      "import": "./dist/esm/hand-raise/index.js",
-      "require": "./dist/cjs/hand-raise/index.js",
-      "default": "./dist/cjs/hand-raise/index.js",
+      "import": "./dist/hand-raise.js",
+      "require": "./dist/hand-raise.cjs",
+      "default": "./dist/hand-raise.cjs",
       "types": "./dist/esm/hand-raise/index.d.ts"
     },
     "./video-background": {
-      "import": "./dist/esm/video-background/index.js",
-      "require": "./dist/cjs/video-background/index.js",
-      "default": "./dist/cjs/video-background/index.js",
+      "import": "./dist/esm/video-background.js",
+      "require": "./dist/cjs/video-background.cjs",
+      "default": "./dist/cjs/video-background.cjs",
       "types": "./dist/esm/video-background/index.d.ts"
     },
     "./participants-tab-action": {
-      "import": "./dist/esm/participants-tab-action/index.js",
-      "require": "./dist/cjs/participants-tab-action/index.js",
-      "default": "./dist/cjs/participants-tab-action/index.js",
+      "import": "./dist/esm/participants-tab-action.js",
+      "require": "./dist/cjs/participants-tab-action.cjs",
+      "default": "./dist/cjs/participants-tab-action.cjs",
       "types": "./dist/esm/participants-tab-action/index.d.ts"
     },
     "./participants-tab-toggle": {
-      "import": "./dist/esm/participants-tab-toggle/index.js",
-      "require": "./dist/cjs/participants-tab-toggle/index.js",
-      "default": "./dist/cjs/participants-tab-toggle/index.js",
+      "import": "./dist/esm/participants-tab-toggle.js",
+      "require": "./dist/cjs/participants-tab-toggle.cjs",
+      "default": "./dist/cjs/participants-tab-toggle.cjs",
       "types": "./dist/esm/participants-tab-toggle/index.d.ts"
     },
     "./chat-host-control": {
-      "import": "./dist/esm/chat-host-control/index.js",
-      "require": "./dist/cjs/chat-host-control/index.js",
-      "default": "./dist/cjs/chat-host-control/index.js",
+      "import": "./dist/esm/chat-host-control.js",
+      "require": "./dist/cjs/chat-host-control.cjs",
+      "default": "./dist/cjs/chat-host-control.cjs",
       "types": "./dist/esm/chat-host-control/index.d.ts"
     },
     "./mic-host-control": {
-      "import": "./dist/esm/mic-host-control/index.js",
-      "require": "./dist/cjs/mic-host-control/index.js",
-      "default": "./dist/cjs/mic-host-control/index.js",
+      "import": "./dist/esm/mic-host-control.js",
+      "require": "./dist/cjs/mic-host-control.cjs",
+      "default": "./dist/cjs/mic-host-control.cjs",
       "types": "./dist/esm/mic-host-control/index.d.ts"
     },
     "./participant-menu-item": {
-      "import": "./dist/esm/participant-menu-item/index.js",
-      "require": "./dist/cjs/participant-menu-item/index.js",
-      "default": "./dist/cjs/participant-menu-item/index.js",
+      "import": "./dist/esm/participant-menu-item.js",
+      "require": "./dist/cjs/participant-menu-item.cjs",
+      "default": "./dist/cjs/participant-menu-item.cjs",
       "types": "./dist/esm/participant-menu-item/index.d.ts"
     }
   },
@@ -91,12 +91,14 @@
   "author": "dyte Inc.",
   "license": "ISC",
   "dependencies": {
-    "@dytesdk/video-background-transformer": "^1.1.4"
+    "@dytesdk/video-background-transformer": "1.1.7"
   },
   "main": "index.js",
+  "peerDependencies": {
+    "@dytesdk/ui-kit": "*"
+  },
   "devDependencies": {
     "typescript": "^5.2.2",
-    "@dytesdk/ui-kit": "latest",
     "vite": "^4.4.8"
   },
   "repository": {

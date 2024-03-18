@@ -1,4 +1,7 @@
 import { defineConfig } from 'vite'
+import p from './package.json'
+
+const deps = [...Object.keys(p.dependencies), ...Object.keys(p.peerDependencies) ];
 
 export default defineConfig({
   build: {
@@ -18,5 +21,8 @@ export default defineConfig({
         'participant-menu-item': "./src/participant-menu-item/index.ts"
       },
     },
+    rollupOptions: {
+      external: deps
+    }
   },
 })
