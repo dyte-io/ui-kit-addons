@@ -15,7 +15,8 @@
     "jsxFactory": "h",
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "emitDeclarationOnly": true,
   },
   "include": ["src"],
   "exclude": ["node_modules"]
