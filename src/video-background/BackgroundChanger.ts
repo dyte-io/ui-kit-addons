@@ -4,7 +4,7 @@ const STYLE = `
 
 :host {
   box-sizing: border-box;
-  position: fixed; 
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
@@ -45,7 +45,10 @@ button {
   padding-left: 1.5rem;
   width: 34rem;
   max-height: 30rem;
-  overflow: scroll;
+  overflow: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--dyte-scrollbar-color, rgb(var(--dyte-colors-background-600, 34 34 34))) var(--dyte-scrollbar-background, transparent);
 }
 
 img {
