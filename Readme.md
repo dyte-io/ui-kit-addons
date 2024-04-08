@@ -63,7 +63,7 @@ npm install @dytesdk/ui-kit-addons
    `custom-controlbar-button`:
 
 ```ts
-import CustomControlbarButton from '@dytesdk/uikit-addon/custom-controlbar-button';
+import CustomControlbarButton from '@dytesdk/ui-kit-addons/custom-controlbar-button';
 ```
 
 3. Configure the addon
