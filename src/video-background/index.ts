@@ -3,6 +3,8 @@ import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteVideoBackgroundTransformer from "@dytesdk/video-background-transformer";
 import type { BackgroundMode } from "./BackgroundChanger";
 import { BackgroundChanger } from "./BackgroundChanger";
+import { PostProcessingConfig } from "@dytesdk/video-background-transformer/types/client/DyteVideoBackgroundTransformer";
+import { SegmentationConfig } from "@dytesdk/video-background-transformer/types/core/helpers/segmentationHelper";
 
 let transform: DyteVideoBackgroundTransformer | null = null;
 let initInProgress = false;
@@ -13,6 +15,8 @@ export interface VideoBGAddonArgs {
     randomCount?: number;
     selector?: string;
     buttonIcon?: string;
+    segmentationConfig?: Partial<SegmentationConfig>;
+    postProcessingConfig?: Partial<PostProcessingConfig>;
 }
 
 // svg string of effects icon
@@ -38,6 +42,8 @@ export default class VideoBGAddon {
     middleware: any;
     selector?: string;
     buttonIcon?: string;
+    segmentationConfig?: Partial<SegmentationConfig>;
+    postProcessingConfig?: Partial<PostProcessingConfig>;
 
     constructor(args?: VideoBGAddonArgs) {
         this.images = args?.images ?? [];
@@ -50,6 +56,8 @@ export default class VideoBGAddon {
         if (args.selector) {
             this.selector = args.selector;
         }
+        this.segmentationConfig = args?.segmentationConfig || {};
+        this.postProcessingConfig = args?.postProcessingConfig || {};
         if (customElements.get("dyte-background-changer")) return;
         customElements.define("dyte-background-changer", BackgroundChanger);
     }
@@ -146,6 +154,7 @@ export default class VideoBGAddon {
             if (this.middleware) {
                 await this.removeVideoVirtualBackground();
             }
+            await meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
             if (mode === "blur") {
                 this.middleware =
                     await transform.createBackgroundBlurVideoMiddleware();
@@ -172,13 +181,26 @@ export default class VideoBGAddon {
         // Initialize the transformer
         if (!transform && !initInProgress) {
             initInProgress = true;
-            DyteVideoBackgroundTransformer.init().then((_transform) => {
+            DyteVideoBackgroundTransformer.init({
+                meeting,
+                segmentationConfig: this.segmentationConfig || {},
+                postProcessingConfig: this.postProcessingConfig || {},
+            }).then((_transform) => {
                 transform = _transform;
             });
         }
 
         // Add buttons with config
         const builder = getBuilder(config);
+
+        // Add Effects in Setup screen
+        const setupScreenControls = builder.find('div#setupcontrols-media');
+        if(setupScreenControls){
+            this.addControlBarButton(setupScreenControls, {
+                size: 'sm'
+            });
+        }
+
         const controlBar = builder.find("div#controlbar-center");
         if (!controlBar) return config;
         this.addControlBarButton(controlBar, {});

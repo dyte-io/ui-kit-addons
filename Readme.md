@@ -91,6 +91,11 @@ const newConfig = registerAddons([myButton], meeting);
 <dyte-meeting meeting={meeting} config={newConfig}></dyte-meeting> 
 ```
 
+## Version Compatibility
+
+This version of UI Kit addon requires Web Core 2.x for Video Background addon to work properly. Without Web Core 2.x, a blank screen might get shown instead of the user's video.
+
+If in case you haven't migrated to Web Core 2.x yet, Please use [1.1.13](https://www.npmjs.com/package/@dytesdk/ui-kit-addons/v/1.1.13) of this UI Kit addon package instead.
 
 ## About
 
