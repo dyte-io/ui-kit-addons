@@ -4,6 +4,7 @@ export default class RaisedHand extends HTMLElement {
     _shadowRoot = undefined;
     _participant = undefined;
     _raised = false;
+    static icon = HandRaiseIcon;
 
     static get observedAttributes() {
         return ["raised"];
@@ -59,7 +60,7 @@ export default class RaisedHand extends HTMLElement {
 		}
 	  </style>
 	  <div style="position: absolute; top: 5px; right: 5px; height: 32px; width: 32px;">
-		  ${HandRaiseIcon}
+		  ${RaisedHand.icon}
 	  </div>
 	`;
     }
