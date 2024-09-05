@@ -1,6 +1,6 @@
 {
   "name": "@dytesdk/ui-kit-addons",
-  "version": "1.1.8",
+  "version": "1.1.13",
   "description": "A collection of Dyte UI-kit addons",
   "type": "module",
   "exports": {
@@ -33,6 +33,12 @@
       "require": "./dist/participants-tab-toggle.cjs",
       "default": "./dist/participants-tab-toggle.cjs",
       "types": "./dist/esm/participants-tab-toggle/index.d.ts"
+    },
+    "./participant-tile-menu": {
+      "import": "./dist/participant-tile-menu.js",
+      "require": "./dist/participant-tile-menu.cjs",
+      "default": "./dist/participant-tile-menu.cjs",
+      "types": "./dist/esm/participant-tile-menu/index.d.ts"
     },
     "./chat-host-control": {
       "import": "./dist/chat-host-control.js",
@@ -78,6 +84,9 @@
       ],
       "participant-menu-item": [
         "./dist/esm/participant-menu-item/index.d.ts"
+      ],
+      "participant-tile-menu": [
+        "./dist/esm/participant-tile-menu/index.d.ts"
       ]
     }
   },
@@ -85,7 +94,7 @@
     "dist/"
   ],
   "publishConfig": {
-    "tag": "staging"
+    "tag": "latest"
   },
   "scripts": {
     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
@@ -94,7 +103,7 @@
   "author": "dyte Inc.",
   "license": "ISC",
   "dependencies": {
-    "@dytesdk/video-background-transformer": "1.1.7"
+    "@dytesdk/video-background-transformer": "1.1.8"
   },
   "main": "index.js",
   "peerDependencies": {
