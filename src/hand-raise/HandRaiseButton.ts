@@ -18,8 +18,24 @@ export class HandRaiseButton extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["meeting", "onclick"];
+        return ["meeting", "onclick", "size"];
     }
+
+    attributeChangedCallback(name: string, _, newValue: string) {
+        if (name === 'size') {
+            const button = this.shadowRoot.querySelector('dyte-controlbar-button');
+            switch(newValue) {
+                case 'sm':
+                case 'md':
+                    button?.setAttribute("label", "");
+                    break;
+                default:
+                    button?.setAttribute("label", "Raise Hand");
+                    break;
+            }
+        }
+    }
+    
 
     set meeting(meeting) {
         this._meeting = meeting;

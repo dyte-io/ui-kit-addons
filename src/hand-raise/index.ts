@@ -2,7 +2,7 @@ import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
 import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import { HandRaisedList } from "./HandRaisedList";
 import RaisedHand from "./RaisedHand";
-import { HandRaiseButton } from "./HandRaiseButton";
+import { HandRaiseButton, HandRaiseIcon } from "./HandRaiseButton";
 import PubSub from "../utils/PubSub";
 
 let handRaised = false;
@@ -24,6 +24,7 @@ window.DyteHandRaiseAddon = {
 export interface Props {
     canRaiseHand?: boolean;
     canManageRaisedHand?: boolean;
+    handRaiseIcon?: string;
 }
 
 /**
@@ -44,10 +45,11 @@ class HandRaiseAddon {
     canRaiseHand = true;
     canManageRaisedHand = false;
 
-    constructor({ canRaiseHand, canManageRaisedHand }: Props) {
+    constructor({ canRaiseHand, canManageRaisedHand, handRaiseIcon }: Props) {
         this.canRaiseHand = canRaiseHand ?? true;
         this.canManageRaisedHand = canManageRaisedHand ?? false;
         if (customElements.get("dyte-raised-hand")) return;
+        RaisedHand.icon = handRaiseIcon ?? HandRaiseIcon;
         customElements.define("dyte-raised-hand", RaisedHand);
         if (customElements.get("dyte-hand-raise-toggle")) return;
         customElements.define("dyte-hand-raise-toggle", HandRaiseButton);
@@ -126,6 +128,8 @@ class HandRaiseAddon {
         // Add buttons with config
         const controlBarLeft = builder.find("div#controlbar-left");
         if (!controlBarLeft) return config;
+        const controlBarMobile = builder.find("div#controlbar-mobile");
+        if (!controlBarMobile) return config;
         const participantTile = builder.find("dyte-participant-tile");
         if (!participantTile) return config;
 
@@ -138,6 +142,7 @@ class HandRaiseAddon {
         if (this.canRaiseHand) {
             // add the raise hand toggle
             controlBarLeft.add("dyte-hand-raise-toggle");
+            controlBarMobile.add("dyte-hand-raise-toggle");
         }
 
         // Return the updated config
