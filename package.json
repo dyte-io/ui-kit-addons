@@ -98,12 +98,13 @@
   },
   "scripts": {
     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
-    "build": "vite build && npm run compile"
+    "build": "vite build && npm run compile",
+    "dev": "npm run build && vite"
   },
   "author": "dyte Inc.",
   "license": "ISC",
   "dependencies": {
-    "@dytesdk/video-background-transformer": "1.1.8"
+    "@dytesdk/video-background-transformer": "^2.0.2"
   },
   "main": "index.js",
   "peerDependencies": {
