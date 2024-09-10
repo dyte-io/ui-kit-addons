@@ -34,6 +34,12 @@
       "default": "./dist/participants-tab-toggle.cjs",
       "types": "./dist/esm/participants-tab-toggle/index.d.ts"
     },
+    "./participant-tile-menu": {
+      "import": "./dist/participant-tile-menu.js",
+      "require": "./dist/participant-tile-menu.cjs",
+      "default": "./dist/participant-tile-menu.cjs",
+      "types": "./dist/esm/participant-tile-menu/index.d.ts"
+    },
     "./chat-host-control": {
       "import": "./dist/chat-host-control.js",
       "require": "./dist/chat-host-control.cjs",
@@ -78,6 +84,9 @@
       ],
       "participant-menu-item": [
         "./dist/esm/participant-menu-item/index.d.ts"
+      ],
+      "participant-tile-menu": [
+        "./dist/esm/participant-tile-menu/index.d.ts"
       ]
     }
   },
@@ -85,16 +94,17 @@
     "dist/"
   ],
   "publishConfig": {
-    "tag": "staging"
+    "tag": "latest"
   },
   "scripts": {
     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
-    "build": "vite build && npm run compile"
+    "build": "vite build && npm run compile",
+    "dev": "npm run build && vite"
   },
   "author": "dyte Inc.",
   "license": "ISC",
   "dependencies": {
-    "@dytesdk/video-background-transformer": "1.1.7"
+    "@dytesdk/video-background-transformer": "^2.0.2"
   },
   "main": "index.js",
   "peerDependencies": {
