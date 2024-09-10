@@ -108,7 +108,7 @@
   },
   "main": "index.js",
   "peerDependencies": {
-    "@dytesdk/ui-kit": "*",
+    "@dytesdk/ui-kit": ">=2.0.0",
     "@dytesdk/web-core": ">=2.0.0"
   },
   "devDependencies": {
