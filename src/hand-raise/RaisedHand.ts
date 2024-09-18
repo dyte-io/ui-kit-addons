@@ -1,9 +1,14 @@
 import { HandRaiseIcon } from "./HandRaiseButton";
+import { DyteStore } from "./type";
 
 export default class RaisedHand extends HTMLElement {
     _shadowRoot = undefined;
     _participant = undefined;
     _raised = false;
+    _meeting = undefined;
+    
+    handRaisedStore: DyteStore = undefined;
+    
     static icon = HandRaiseIcon;
 
     static get observedAttributes() {
@@ -23,6 +28,14 @@ export default class RaisedHand extends HTMLElement {
         this._participant = participant;
     }
 
+    set meeting(meeting) {
+        this._meeting = meeting;
+    }
+
+    get meeting() {
+        return this._meeting;
+    }
+
     get raised() {
         return this._raised;
     }
@@ -32,19 +45,19 @@ export default class RaisedHand extends HTMLElement {
     }
 
     disconnectedCallback() {
-        window.DyteHandRaiseAddon.pubsub?.unsubscribe("update-raise-hand", this.updateShowHand.bind(this));
+        this.handRaisedStore.unsubscribe(this.participant.id, this.updateShowHand.bind(this));
     }
 
-    updateShowHand(data: any) {
-        if (data.participantId === this.participant.id) {
-            this.raised = data.raised;
-            this.updateContent();
-        }
+    updateShowHand() {
+        this.raised = !!this.handRaisedStore.get(this.participant.id);
+        this.updateContent();
     }
 
     connectedCallback() {
-        window.DyteHandRaiseAddon.pubsub?.subscribe("update-raise-hand", this.updateShowHand.bind(this));
-        this.raised = window.DyteHandRaiseAddon.list?.includes(this.participant.id);
+        this.handRaisedStore = this.meeting.stores.stores.get('handRaise');
+        this.raised = !!this.handRaisedStore.get(this.participant.id);
+        this.handRaisedStore.subscribe(this.participant.id, this.updateShowHand.bind(this));
+        this.updateContent();
     }
 
     attributeChangedCallback() {

@@ -109,7 +109,7 @@
   "main": "index.js",
   "peerDependencies": {
     "@dytesdk/ui-kit": ">=2.0.0",
-    "@dytesdk/web-core": ">=2.0.0"
+    "@dytesdk/web-core": "^2.0.7"
   },
   "devDependencies": {
     "typescript": "^5.2.2",
