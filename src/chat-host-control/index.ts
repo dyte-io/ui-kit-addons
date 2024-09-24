@@ -3,11 +3,13 @@ import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
 import { DyteStore } from "../hand-raise/type";
+import DyteClient from "@dytesdk/web-core";
 
-export interface ChatHostToggleArgs {
+export interface ChatHostToggleProps {
     hostPresets: string[];
     targetPresets: string[];
     addActionInParticipantMenu: boolean;
+    meeting: DyteClient;
 }
 
 
@@ -101,10 +103,24 @@ export default class ChatHostToggle {
         }
     });
 
-    constructor(args: ChatHostToggleArgs) {
+    constructor(args: ChatHostToggleProps) {
         this.targetPresets = args.targetPresets;
         this.hostPresets = args.hostPresets;
         this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
+    }
+
+    static async init(
+        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting }: ChatHostToggleProps
+    ){
+        await meeting.stores.create('chatPermissionsStore');
+        //@ts-ignore
+        await meeting.stores.stores.get('chatPermissionsStore').updateRateLimits(10, 1);
+        return new ChatHostToggle({
+            targetPresets,
+            hostPresets,
+            addActionInParticipantMenu,
+            meeting
+        });
     }
 
     updateBlockedParticipants(state: boolean, participantId?: string) {

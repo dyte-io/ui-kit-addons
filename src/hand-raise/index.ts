@@ -3,18 +3,20 @@ import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import { HandRaisedList } from "./HandRaisedList";
 import RaisedHand from "./RaisedHand";
 import { HandRaiseButton, HandRaiseIcon } from "./HandRaiseButton";
+import DyteClient from "@dytesdk/web-core";
 
-export interface Props {
+export interface HandRaiseProps {
     canRaiseHand?: boolean;
     canManageRaisedHand?: boolean;
     handRaiseIcon?: string;
+    meeting: DyteClient;
 }
 
 /**
  * HandRaiseAddon
  * @description
  * This addon allows participants to raise their hand and the host to manage the raised hands.
- * @param {Props} props
+ * @param {HandRaiseProps} props
  * @returns {HandRaiseAddon}
  * @example
  * const handRaiseAddon = new HandRaiseAddon({
@@ -29,7 +31,7 @@ class HandRaiseAddon {
     canRaiseHand = true;
     canManageRaisedHand = false;
 
-    constructor({ canRaiseHand, canManageRaisedHand, handRaiseIcon }: Props) {
+    constructor({ canRaiseHand, canManageRaisedHand, handRaiseIcon }: HandRaiseProps) {
         this.canRaiseHand = canRaiseHand ?? true;
         this.canManageRaisedHand = canManageRaisedHand ?? false;
         if (customElements.get("dyte-raised-hand")) return;
@@ -39,6 +41,20 @@ class HandRaiseAddon {
         customElements.define("dyte-hand-raise-toggle", HandRaiseButton);
         if (customElements.get("dyte-hand-raised-list")) return;
         customElements.define("dyte-hand-raised-list", HandRaisedList);
+    }
+
+    static async init(
+        { meeting, canRaiseHand = false, canManageRaisedHand = false, handRaiseIcon}: HandRaiseProps
+    ){
+        await meeting.stores.create('handRaise');
+        // @ts-ignore
+        await meeting.stores.stores.get('handRaise').updateRateLimits(10, 1);
+        return new HandRaiseAddon({
+            canRaiseHand,
+            canManageRaisedHand,
+            handRaiseIcon,
+            meeting,
+        });
     }
 
     register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
