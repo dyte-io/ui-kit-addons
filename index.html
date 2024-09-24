@@ -59,14 +59,14 @@
                 });
 
                 const chatHostControl = new ChatHostControl({
-                    hostPresets: ['group_call_host'],
-                    targetPresets: ['group_call_host'],
-                    addActionInParticipantMenu: false,
+                    hostPresets: ['webinar_presenter'],
+                    targetPresets: ['webinar_viewer'],
+                    addActionInParticipantMenu: true,
                 });
 
                 const micHostControl = new MicHostControl({
-                    hostPresets: ['group_call_host'],
-                    targetPresets: ['group_call_host'],
+                    hostPresets: ['webinar_presenter'],
+                    targetPresets: ['webinar_viewer'],
                     addActionInParticipantMenu: true,
                 });
 

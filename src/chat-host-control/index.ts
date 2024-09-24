@@ -38,8 +38,6 @@ export default class ChatHostToggle {
 
     targetPresets: string[];
 
-    sendTimeout: any;
-
     state = true;
 
     chatPermissionsStore: DyteStore = undefined;
@@ -53,27 +51,11 @@ export default class ChatHostToggle {
         label: "Chat",
         onEnabled: () => {
             this.state = true;
-            if (this.sendTimeout) {
-                clearInterval(this.sendTimeout);
-            }
-            this.chatPermissionsStore.set('chatPermissionUpdate', {
-                targetPresets: this.targetPresets, canSend: true
-            }, true, true);
-            this.updateBlockedParticipants(!this.state);
+            this.updateBlockedParticipantsInStore(false);
         },
         onDisabled: () => {
             this.state = false;
-            if (this.sendTimeout) {
-                clearInterval(this.sendTimeout);
-            }
-            const disableChat = () => {
-                this.chatPermissionsStore.set('chatPermissionUpdate', {
-                    targetPresets: this.targetPresets, canSend: false
-                }, true, true);
-            };
-            this.sendTimeout = setInterval(disableChat, 5000);
-            disableChat();
-            this.updateBlockedParticipants(!this.state);
+            this.updateBlockedParticipantsInStore(true);
         },
         updateToggleSetterFn: (cb) => {
             this.updateToggleWithoutAction = cb;
@@ -93,13 +75,14 @@ export default class ChatHostToggle {
                 iconClass: isBlocked ? "" : "red-icon"
             });
             return this.chatPermissionsStore.subscribe(
-                '*',
+                'overrides',
                 () => {
                     const isBlocked = this.isParticipantBlocked(participantId);
                     callback({
                         label: isBlocked ? "Enable Chat": "Disable Chat",
                         icon: isBlocked ? chatOnIcon : chatOffIcon,
-                        iconClass: isBlocked ? "" : "red-icon"
+                        iconClass: isBlocked ? "" : "red-icon",
+                        disabled: !this.canBlockParticipant(participantId)
                     });
                 });
         },
@@ -123,18 +106,6 @@ export default class ChatHostToggle {
         this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
     }
 
-    // if overrides are present, and the participant is not blocked, return false
-    // if overrides are present, and the participant is blocked, return true
-    // if overrides are not present, and blockAll is true, return true
-    // if overrides are not present, and blockAll is false, return false
-
-    isParticipantBlocked(participantId: string) {
-        if (this.chatPermissionsStore.get('overrides')?.[participantId] !== undefined) {
-            return this.chatPermissionsStore.get('overrides')?.[participantId];
-        }
-        return this.chatPermissionsStore.get('blockAll');
-    }
-
     updateBlockedParticipants(state: boolean, participantId?: string) {
         if (participantId) {
             this.chatPermissionsStore.set('overrides', {
@@ -148,12 +119,50 @@ export default class ChatHostToggle {
         }
     }
 
-    updatePermissions({state}: {state: 'ALLOWED' | 'NOT_ALLOWED'}){
+    canBlockParticipant(participantId: string){
+        const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
+        return this.targetPresets.includes(participant.presetName);
+    }
+
+    isParticipantBlocked(participantId: string) {
+        if(!this.canBlockParticipant(participantId)){
+            return false;
+        }
+        if (this.chatPermissionsStore.get('overrides')?.[participantId] !== undefined) {
+            return !!(this.chatPermissionsStore.get('overrides')?.[participantId]);
+        }
+        return !!this.chatPermissionsStore.get('overrides')?.blockAll;
+    }
+
+    updateBlockedParticipantsInStore(state: boolean, participantId?: string) {
+        
+        if(participantId && !this.canBlockParticipant(participantId)){
+            return;
+        }
+        if (participantId) {
+            this.chatPermissionsStore.set('overrides', {
+                ...(this.chatPermissionsStore.get('overrides') || {}),
+                [participantId]: state,
+            }, true, true);
+        } else {
+            this.chatPermissionsStore.set('overrides', {
+                blockAll: state,
+            }, true, true);
+        }
+    }
+    updatePermissionsInUILocally({state}: {state: boolean}){
         Object.defineProperty(
             this.meeting?.self.permissions.chatPublic,
             "canSend",
             {
                 value: state
+            }
+        );
+        Object.defineProperty(
+            this.meeting?.self.permissions.chatPublic,
+            "canReceive",
+            {
+                value: true
             }
         );
         Object.defineProperty(
@@ -172,41 +181,38 @@ export default class ChatHostToggle {
         );
         this.meeting?.self.permissions.emit("*");
     }
-
-    onChatPermissionUpdate() {
-        const payload = this.meeting.stores.stores.get('chatPermissionsStore').get('chatPermissionUpdate');
-        if(!payload){
-            return;
-        }
-        if (
-            (payload.targetPresets?.includes(this.meeting?.self.presetName) ||
-                payload.targetId === this.meeting?.self.id)
-        ) {
-            const state = payload.canSend;
-            this.updatePermissions({state});
-        }
-    }
-    onOverrideUpdate(){
-        if(this.state === !this.chatPermissionsStore.get('overrides')?.blockAll){
-            return;
-        }
+    processChatPermissionStoreUpdate(){
         this.state = !this.chatPermissionsStore.get('overrides')?.blockAll;
         this.updateToggleWithoutAction(this.state);
-        this.updatePermissions({state: this.state? 'ALLOWED' : 'NOT_ALLOWED'});
+
+        if(!this.canBlockParticipant(this.meeting.self.id)){
+            return;
+        }
+        
+        const isBlocked = this.isParticipantBlocked(this.meeting.self.id);
+
+        this.updatePermissionsInUILocally({
+            state:  !isBlocked,
+        });
     }
 
     async unregister() {
-        this.chatPermissionsStore.unsubscribe('chatPermissionUpdate', this.onChatPermissionUpdate.bind(this));
-        this.chatPermissionsStore.unsubscribe('overrides', this.onOverrideUpdate.bind(this));
+        this.button.unregister();
+        this.chatPermissionsStore.unsubscribe('overrides', this.processChatPermissionStoreUpdate.bind(this));
     }
 
     register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
         this.meeting = meeting;
-        this.chatPermissionsStore = meeting.stores.stores.get('chatPermissionsStore');
-        this.state = !this.chatPermissionsStore.get('overrides')?.blockAll;
-        this.chatPermissionsStore.subscribe('chatPermissionUpdate', this.onChatPermissionUpdate.bind(this));
-        this.chatPermissionsStore.subscribe('overrides', this.onOverrideUpdate.bind(this));
         
+        this.chatPermissionsStore = meeting.stores.stores.get('chatPermissionsStore');
+        
+        // Set default values
+        this.state = !this.chatPermissionsStore.get('overrides')?.blockAll;
+        this.processChatPermissionStoreUpdate();
+
+        // Subscribe to listen to new
+        this.chatPermissionsStore.subscribe('overrides', this.processChatPermissionStoreUpdate.bind(this));
+
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));
             if(this.addActionInParticipantMenu){

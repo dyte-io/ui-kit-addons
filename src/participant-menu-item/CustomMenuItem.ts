@@ -3,6 +3,7 @@ export interface MenuState {
     icon?: string;
     iconClass?: string;
     labelClass?: string;
+    disabled?: boolean;
 }
 
 export default class CustomMenuItem extends HTMLElement {
@@ -13,6 +14,7 @@ export default class CustomMenuItem extends HTMLElement {
         icon: null,
         iconClass: null,
         labelClass: null,
+        disabled: false,
     } as MenuState;
 
     icon: string = '';

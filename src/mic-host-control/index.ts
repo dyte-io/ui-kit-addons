@@ -37,8 +37,6 @@ export default class MicHostToggle {
 
     targetPresets: string[];
 
-    sendTimeout: any;
-
     state = true;
 
     micPermissionsStore: DyteStore = undefined;
@@ -52,28 +50,11 @@ export default class MicHostToggle {
         label: "Microphone",
         onEnabled: () => {
             this.state = true;
-            if (this.sendTimeout) {
-                clearInterval(this.sendTimeout);
-            }
-            this.micPermissionsStore.set('micPermissionUpdate', {
-                targetPresets: this.targetPresets, canProduce: "ALLOWED"
-            }, true, true);
-
-            this.updateBlockedParticipants(!this.state);
+            this.updateBlockedParticipantsInStore(false);
         },
         onDisabled: () => {
             this.state = false;
-            if (this.sendTimeout) {
-                clearInterval(this.sendTimeout);
-            }
-            const disableMic = () => {
-                this.micPermissionsStore.set('micPermissionUpdate', {
-                    targetPresets: this.targetPresets, canProduce: "NOTE_ALLOWED"
-                }, true, true);
-            };
-            this.sendTimeout = setInterval(disableMic, 2000);
-            disableMic();
-            this.updateBlockedParticipants(!this.state);
+            this.updateBlockedParticipantsInStore(true);
         },
         updateToggleSetterFn: (cb) => {
             this.updateToggleWithoutAction = cb;
@@ -92,30 +73,21 @@ export default class MicHostToggle {
                 iconClass: isBlocked ? "" : "red-icon"
             });
             return this.micPermissionsStore.subscribe(
-                '*',
+                'overrides',
                 () => {
                     const isBlocked = this.isParticipantBlocked(participantId);
                     callback({
                         label: isBlocked ? "Enable Mic" : "Disable Mic",
                         icon: isBlocked ? micOnIcon : micOffIcon,
-                        iconClass: isBlocked ? "" : "red-icon"
+                        iconClass: isBlocked ? "" : "red-icon",
+                        disabled: !this.canBlockParticipant(participantId)
                     });
                 });
         },
 
         onClick: (participantId) => {
             const isBlocked = this.isParticipantBlocked(participantId);
-            this.micPermissionsStore.set(
-                "micPermissionUpdate",
-                { 
-                    targetId: participantId,
-                    canProduce: isBlocked? "ALLOWED": "NOTE_ALLOWED"
-                },
-                true,
-                true,
-            );
-            // toggle the state
-            this.updateBlockedParticipants(!isBlocked, participantId);
+            this.updateBlockedParticipantsInStore(!isBlocked, participantId);
         }
     });
 
@@ -125,18 +97,26 @@ export default class MicHostToggle {
         this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
     }
 
-    // if overrides are present, and the participant is not blocked, return false
-    // if overrides are present, and the participant is blocked, return true
-    // if overrides are not present, and blockAll is true, return true
-    // if overrides are not present, and blockAll is false, return false
-    isParticipantBlocked(participantId: string) {
-        if (this.micPermissionsStore.get('overrides')?.[participantId] !== undefined) {
-            return this.micPermissionsStore.get('overrides')?.[participantId];
-        }
-        return this.micPermissionsStore.get('blockAll');
+    canBlockParticipant(participantId: string){
+        const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
+        return this.targetPresets.includes(participant.presetName);
     }
 
-    updateBlockedParticipants(state: boolean, participantId?: string) {
+    isParticipantBlocked(participantId: string) {
+        if(!this.canBlockParticipant(participantId)){
+            return false;
+        }
+        if (this.micPermissionsStore.get('overrides')?.[participantId] !== undefined) {
+            return !!(this.micPermissionsStore.get('overrides')?.[participantId]);
+        }
+        return !!this.micPermissionsStore.get('overrides')?.blockAll;
+    }
+
+    updateBlockedParticipantsInStore(state: boolean, participantId?: string) {
+        
+        if(participantId && !this.canBlockParticipant(participantId)){
+            return;
+        }
         if (participantId) {
             this.micPermissionsStore.set('overrides', {
                 ...(this.micPermissionsStore.get('overrides') || {}),
@@ -148,7 +128,7 @@ export default class MicHostToggle {
             }, true, true);
         }
     }
-    updatePermissions({state}: {state: 'ALLOWED' | 'NOT_ALLOWED'}){
+    updatePermissionsInUILocally({state}: {state: 'ALLOWED' | 'NOT_ALLOWED'}){
         Object.defineProperty(
             this.meeting?.self.permissions,
             "canProduceAudio", {
@@ -159,45 +139,35 @@ export default class MicHostToggle {
         // @ts-ignore
         this.meeting?.self.permissions.emit("micPermissionUpdate");
     }
-    onOverrideUpdate(){
-        if(this.state === !this.micPermissionsStore.get('overrides')?.blockAll){
-            return;
-        }
+    processMicPermissionStoreUpdate(){
         this.state = !this.micPermissionsStore.get('overrides')?.blockAll;
         this.updateToggleWithoutAction(this.state);
-        this.updatePermissions({
-            state: this.state? 'ALLOWED' : 'NOT_ALLOWED',
-        });
-    }
 
-    async onMicPermissionUpdate() {
-        const payload = this.meeting.stores.stores.get('micPermissionsStore').get('micPermissionUpdate');
-        if(!payload){
+        if(!this.canBlockParticipant(this.meeting.self.id)){
             return;
         }
-        if (
-            (payload.targetPresets?.includes(this.meeting?.self.presetName) ||
-                payload.targetId === this.meeting?.self.id)
-        ) {
-            this.updatePermissions({
-                state:  payload.canProduce
-            });
-        }
+        
+        const isBlocked = this.isParticipantBlocked(this.meeting.self.id);
+        this.updatePermissionsInUILocally({
+            state:  isBlocked ? "NOT_ALLOWED" : "ALLOWED"
+        });
     }
 
     async unregister() {
         this.button.unregister();
-
-        this.micPermissionsStore.unsubscribe('micPermissionUpdate', this.onMicPermissionUpdate.bind(this));
-        this.micPermissionsStore.unsubscribe('overrides', this.onOverrideUpdate.bind(this));
+        this.micPermissionsStore.unsubscribe('overrides', this.processMicPermissionStoreUpdate.bind(this));
     }
 
     register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
         this.meeting = meeting;
         this.micPermissionsStore = meeting.stores.stores.get('micPermissionsStore');
+        
+        // Set default values
         this.state = !this.micPermissionsStore.get('overrides')?.blockAll;
-        this.micPermissionsStore.subscribe('micPermissionUpdate', this.onMicPermissionUpdate.bind(this));
-        this.micPermissionsStore.subscribe('overrides', this.onOverrideUpdate.bind(this));
+        this.processMicPermissionStoreUpdate();
+
+        // Subscribe to listen to new
+        this.micPermissionsStore.subscribe('overrides', this.processMicPermissionStoreUpdate.bind(this));
 
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));
