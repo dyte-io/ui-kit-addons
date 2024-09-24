@@ -84,13 +84,9 @@ export default class CustomMenuItem extends HTMLElement {
             container.appendChild(icon);
         }
 
-        container.style.cursor = '';
         
         if (this.state.labelClass) {
             container.className = this.state.labelClass;
-            if(container.className.includes('disabled')){
-                container.style.cursor = 'not-allowed';
-            }
         }
 
         const textNode = document.createTextNode(this.state.label ?? this.label);

@@ -6,7 +6,6 @@ interface ParticipantMenuItemArgs {
     label: string;
     icon?: string;
     styles?: string;
-    disabled?: boolean;
     onClick: (participantId: string) => void;
     onStateChange: (participantId: string, callback: (state: MenuState) => void) => void;
 }
@@ -39,8 +38,6 @@ export default class ParticipantMenuItem {
 
     styles?: string;
 
-    disabled?: boolean;
-
     onStateChange: (participantId: string, callback: (state: MenuState) => void) => void;
 
     constructor(args: ParticipantMenuItemArgs) {
@@ -49,7 +46,6 @@ export default class ParticipantMenuItem {
         this.styles = args.styles;
         this.onClick = args.onClick;
         this.onStateChange = args.onStateChange;
-        this.disabled = args.disabled || false;
     }
 
     async unregister() {
@@ -80,8 +76,6 @@ export default class ParticipantMenuItem {
             onStateChange: this.onStateChange,
             // @ts-ignore
             onClick: this.onClick,
-            // @ts-ignore
-            disabled: this.disabled,
         });
 
         // Return the updated config

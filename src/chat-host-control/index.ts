@@ -59,7 +59,7 @@ export default class ChatHostToggle {
             this.state = false;
             this.updateBlockedParticipantsInStore(true);
         },
-        updateToggleSetterFn: (cb) => {
+        onStateChange: (cb) => {
             this.updateToggleWithoutAction = cb;
             cb(this.state);
         }
@@ -69,6 +69,14 @@ export default class ChatHostToggle {
     menuItem = new ParticipantMenuItem({
         label: "Disable Chat",
         icon: chatOffIcon,
+        styles: `
+            .disabled{
+                cursor: not-allowed;
+            }
+            .red-icon{
+                color: red;
+            }
+        `,
         onStateChange: (participantId, callback) => {
             const isBlocked = this.isParticipantBlocked(participantId);
             callback({

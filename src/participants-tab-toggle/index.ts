@@ -8,7 +8,7 @@ export interface ParticipantTabToggleArgs {
     initialValue?: () => boolean;
     onEnabled: () => void;
     onDisabled: () => void;
-    updateToggleSetterFn?: (callback: (state: boolean) => void) => void;
+    onStateChange?: (callback: (state: boolean) => void) => void;
     attributes?: { [key: string]: any };
 }
 
@@ -50,14 +50,14 @@ export default class ParticipantTabToggle {
 
     position = "start";
 
-    updateToggleSetterFn: (cb: (state: boolean) => {}) => void;
+    onStateChange: (cb: (state: boolean) => {}) => void = () => {};
 
     constructor(args: ParticipantTabToggleArgs) {
         this.position = args.position;
         this.label = args.label;
         this.onEnabled = args.onEnabled;
         this.onDisabled = args.onDisabled;
-        this.updateToggleSetterFn = args.updateToggleSetterFn;
+        this.onStateChange = args.onStateChange;
     }
 
     async unregister() {
@@ -86,7 +86,7 @@ export default class ParticipantTabToggle {
             slot: this.position,
             label: this.label,
             // @ts-ignore
-            updateToggleSetterFn: this.updateToggleSetterFn,
+            onStateChange: this.onStateChange,
             // @ts-ignore
             onEnabled: this.onEnabled,
             // @ts-ignore

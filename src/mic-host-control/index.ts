@@ -58,7 +58,7 @@ export default class MicHostToggle {
             this.state = false;
             this.updateBlockedParticipantsInStore(true);
         },
-        updateToggleSetterFn: (cb) => {
+        onStateChange: (cb) => {
             this.updateToggleWithoutAction = cb;
             cb(this.state);
         }
@@ -67,6 +67,14 @@ export default class MicHostToggle {
     menuItem = new ParticipantMenuItem({
         label: "Disable Mic",
         icon: micOffIcon,
+        styles: `
+        .disabled{
+            cursor: not-allowed;
+        }
+        .red-icon{
+            color: red;
+        }
+        `,
         onStateChange: (participantId, callback) => {
             const isBlocked = this.isParticipantBlocked(participantId);
             callback({

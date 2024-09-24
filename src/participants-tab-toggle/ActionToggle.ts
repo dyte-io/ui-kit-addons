@@ -4,7 +4,7 @@ class ActionToggle extends HTMLElement {
     state = false;
     onEnabled = () => {};
     onDisabled = () => {};
-    updateToggleSetterFn: (cb: (state: boolean) => void) => void = () => {};
+    onStateChange: (cb: (state: boolean) => void) => void = () => {};
 
     constructor() {
         super();
@@ -97,7 +97,7 @@ class ActionToggle extends HTMLElement {
         container.innerText = this.label;
         container.appendChild(button);
         this.shadow.appendChild(container);
-        this.updateToggleSetterFn((state) => {
+        this.onStateChange((state) => {
             this.state = state;
             button.checked = state;
         });
