@@ -83,7 +83,6 @@ export default class CustomMenuItem extends HTMLElement {
             icon.setAttribute("slot", "start");
             container.appendChild(icon);
         }
-
         
         if (this.state.labelClass) {
             container.className = this.state.labelClass;

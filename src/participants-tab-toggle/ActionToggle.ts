@@ -1,6 +1,7 @@
 class ActionToggle extends HTMLElement {
     shadow;
     label = "Click me";    
+    initialValue = () => false;
     state = false;
     onEnabled = () => {};
     onDisabled = () => {};
@@ -83,6 +84,7 @@ class ActionToggle extends HTMLElement {
             "dyte-switch",
             "action-switch"
         ) as HTMLDyteSwitchElement;
+        this.state = this.initialValue();
         button.checked = this.state;
         button.addEventListener("dyteChange", () => {
             if (button.checked == this.state) return;

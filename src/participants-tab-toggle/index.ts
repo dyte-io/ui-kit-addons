@@ -50,6 +50,8 @@ export default class ParticipantTabToggle {
 
     position = "start";
 
+    initialValue: () => boolean = () => false;
+
     onStateChange: (cb: (state: boolean) => {}) => void = () => {};
 
     constructor(args: ParticipantTabToggleArgs) {
@@ -57,6 +59,9 @@ export default class ParticipantTabToggle {
         this.label = args.label;
         this.onEnabled = args.onEnabled;
         this.onDisabled = args.onDisabled;
+        if(args.initialValue){
+            this.initialValue = args.initialValue
+        }
         this.onStateChange = args.onStateChange;
     }
 
@@ -85,6 +90,8 @@ export default class ParticipantTabToggle {
         participants?.add("participant-tab-toggle", {
             slot: this.position,
             label: this.label,
+            // @ts-ignore
+            initialValue: this.initialValue,
             // @ts-ignore
             onStateChange: this.onStateChange,
             // @ts-ignore

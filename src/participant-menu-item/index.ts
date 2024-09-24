@@ -75,7 +75,7 @@ export default class ParticipantMenuItem {
             // @ts-ignore
             onStateChange: this.onStateChange,
             // @ts-ignore
-            onClick: this.onClick,
+            onClick: this.onClick
         });
 
         // Return the updated config
