@@ -81,7 +81,7 @@ export default class MicHostToggle {
                 label: isBlocked ? "Enable Mic" : "Disable Mic",
                 icon: isBlocked ? micOnIcon : micOffIcon,
                 iconClass: isBlocked ? "" : "red-icon",
-                labelClass: `${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
+                labelClass: `${isBlocked ? "" : "red"} ${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
             });
             return this.micPermissionsStore.subscribe(
                 'overrides',
@@ -91,7 +91,7 @@ export default class MicHostToggle {
                         label: isBlocked ? "Enable Mic" : "Disable Mic",
                         icon: isBlocked ? micOnIcon : micOffIcon,
                         iconClass: isBlocked ? "" : "red-icon",
-                        labelClass: `${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
+                        labelClass: `${isBlocked ? "" : "red"} ${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
                     });
                 });
         },
