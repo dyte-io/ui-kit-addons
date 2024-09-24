@@ -97,7 +97,7 @@ This version of UI Kit addon requires Web Core 2.x for Video Background addon to
 
 If in case you haven't migrated to Web Core 2.x yet, Please use [1.1.13](https://www.npmjs.com/package/@dytesdk/ui-kit-addons/v/1.1.13) of this UI Kit addon package instead.
 
-Few of the addons such as HandRaise, Chat Host Control & Mic Host Control has been migrated to use an `async static init` method instead of the constructor to utilise meeting store APIs with async await.
+Few of the addons such as HandRaise, Chat Host Control & Mic Host Control have been migrated to use an `async static init` method instead of the constructor, to utilise meeting store APIs, with async await.
 
 For all such addons, rather than calling their constructor, init method should be called.
 
