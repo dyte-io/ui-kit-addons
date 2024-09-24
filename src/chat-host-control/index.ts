@@ -72,7 +72,8 @@ export default class ChatHostToggle {
             callback({
                 label: isBlocked ? "Enable Chat": "Disable Chat",
                 icon: isBlocked ? chatOnIcon : chatOffIcon,
-                iconClass: isBlocked ? "" : "red-icon"
+                iconClass: isBlocked ? "" : "red-icon",
+                labelClass: `${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
             });
             return this.chatPermissionsStore.subscribe(
                 'overrides',
@@ -82,7 +83,7 @@ export default class ChatHostToggle {
                         label: isBlocked ? "Enable Chat": "Disable Chat",
                         icon: isBlocked ? chatOnIcon : chatOffIcon,
                         iconClass: isBlocked ? "" : "red-icon",
-                        disabled: !this.canBlockParticipant(participantId)
+                        labelClass: `${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
                     });
                 });
         },

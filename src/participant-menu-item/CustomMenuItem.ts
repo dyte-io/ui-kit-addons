@@ -3,7 +3,6 @@ export interface MenuState {
     icon?: string;
     iconClass?: string;
     labelClass?: string;
-    disabled?: boolean;
 }
 
 export default class CustomMenuItem extends HTMLElement {
@@ -14,7 +13,6 @@ export default class CustomMenuItem extends HTMLElement {
         icon: null,
         iconClass: null,
         labelClass: null,
-        disabled: false,
     } as MenuState;
 
     icon: string = '';
@@ -86,8 +84,13 @@ export default class CustomMenuItem extends HTMLElement {
             container.appendChild(icon);
         }
 
+        container.style.cursor = '';
+        
         if (this.state.labelClass) {
             container.className = this.state.labelClass;
+            if(container.className.includes('disabled')){
+                container.style.cursor = 'not-allowed';
+            }
         }
 
         const textNode = document.createTextNode(this.state.label ?? this.label);
