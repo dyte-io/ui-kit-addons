@@ -66,16 +66,11 @@ class HandRaiseAddon {
             // add the raised hand list
             participants.add("dyte-hand-raised-list", {
                 slot: "start",
-                meeting: meeting as any as string,
+                //@ts-ignore
+                meeting: meeting,
                 // @ts-ignore
                 onRemove: (participantId: string) => {
-
                     meeting.stores.stores.get('handRaise')?.set(participantId, false, true, true);
-
-                    // meeting.participants.broadcastMessage(
-                    //     "update-raise-hand",
-                    //     data
-                    // );
                 }
             });
         }
@@ -91,17 +86,21 @@ class HandRaiseAddon {
 
         // show the raised hand icon on the participant tile
         participantTile.add("dyte-raised-hand", {
-            meeting: meeting as any as string,
-            raised: false as any as string,
+            //@ts-ignore
+            meeting: meeting,
+            //@ts-ignore
+            raised: false,
         });
 
         if (this.canRaiseHand) {
             // add the raise hand toggle
             controlBarLeft.add("dyte-hand-raise-toggle", {
-                meeting: meeting as any as string,
+                //@ts-ignore
+                meeting: meeting,
             });
             controlBarMobile.add("dyte-hand-raise-toggle", {
-                meeting: meeting as any as string,
+                //@ts-ignore
+                meeting: meeting,
             });
         }
 
