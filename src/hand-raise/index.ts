@@ -112,10 +112,18 @@ class HandRaiseAddon {
 
                 const participant =
                     meeting.participants.joined.get(participantId);
+
+                const pip = meeting.participants.pip;
                 if (participant) {
                     participant.raised = raised;
+                    pip.updateSource && pip.updateSource(participant.id, {
+                        handRaised: raised
+                    })
                 } else if (participantId === meeting.self.id) {
                     meeting.self.raised = raised;
+                    pip.updateSource && pip.updateSource(meeting.self.id, {
+                        handRaised: raised
+                    })
                 }
 
                 window.DyteHandRaiseAddon.pubsub?.publish("update-raise-hand", {
