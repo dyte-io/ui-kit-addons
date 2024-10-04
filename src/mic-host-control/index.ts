@@ -160,7 +160,7 @@ export default class MicHostToggle {
             }
         );
         // @ts-ignore
-        this.meeting?.self.permissions.emit("micPermissionUpdate");
+        this.meeting?.self.permissions.emit("permissionsUpdate", { media: { audio: { canProduce: state}}});
     }
     processMicPermissionStoreUpdate(){
         this.state = !this.micPermissionsStore.get('overrides')?.blockAll;
