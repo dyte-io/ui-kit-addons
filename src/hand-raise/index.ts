@@ -47,8 +47,6 @@ class HandRaiseAddon {
         { meeting, canRaiseHand = false, canManageRaisedHand = false, handRaiseIcon}: HandRaiseProps
     ){
         await meeting.stores.create('handRaise');
-        // @ts-ignore
-        await meeting.stores.stores.get('handRaise').updateRateLimits(10, 1);
         return new HandRaiseAddon({
             canRaiseHand,
             canManageRaisedHand,

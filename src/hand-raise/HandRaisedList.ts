@@ -1,4 +1,4 @@
-import { DyteStore } from "./type";
+import { DyteStore } from '@dytesdk/web-core';
 
 const STYLES = `
     :host {
@@ -87,6 +87,7 @@ export class HandRaisedList extends HTMLElement {
         const style = document.createElement("style");
         style.innerHTML = STYLES;
         this.shadow.appendChild(style);
+        this.updateContent = this.updateContent.bind(this);
     }
 
     static get observedAttributes() {
@@ -206,10 +207,10 @@ export class HandRaisedList extends HTMLElement {
     connectedCallback() {
         this.createContainer();
         this.updateContent();
-        this.handRaisedStore.subscribe("*", this.updateContent.bind(this));
+        this.handRaisedStore.subscribe("*", this.updateContent);
     }
 
     disconnectedCallback(){
-        this.handRaisedStore.unsubscribe("*", this.updateContent.bind(this));
+        this.handRaisedStore.unsubscribe("*", this.updateContent);
     }
 }

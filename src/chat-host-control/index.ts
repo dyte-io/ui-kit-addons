@@ -2,8 +2,7 @@ import { UIConfig } from "@dytesdk/ui-kit";
 import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
-import { DyteStore } from "../hand-raise/type";
-import DyteClient from "@dytesdk/web-core";
+import DyteClient, { DyteStore } from "@dytesdk/web-core";
 
 export interface ChatHostToggleProps {
     hostPresets: string[];
@@ -115,14 +114,13 @@ export default class ChatHostToggle {
         this.targetPresets = args.targetPresets;
         this.hostPresets = args.hostPresets;
         this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
+        this.processChatPermissionStoreUpdate = this.processChatPermissionStoreUpdate.bind(this)
     }
 
     static async init(
         { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting }: ChatHostToggleProps
     ){
         await meeting.stores.create('chatPermissionsStore');
-        //@ts-ignore
-        await meeting.stores.stores.get('chatPermissionsStore').updateRateLimits(10, 1);
         return new ChatHostToggle({
             targetPresets,
             hostPresets,
@@ -223,7 +221,7 @@ export default class ChatHostToggle {
 
     async unregister() {
         this.button.unregister();
-        this.chatPermissionsStore.unsubscribe('overrides', this.processChatPermissionStoreUpdate.bind(this));
+        this.chatPermissionsStore.unsubscribe('overrides', this.processChatPermissionStoreUpdate);
     }
 
     register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
@@ -236,7 +234,7 @@ export default class ChatHostToggle {
         this.processChatPermissionStoreUpdate();
 
         // Subscribe to listen to new
-        this.chatPermissionsStore.subscribe('overrides', this.processChatPermissionStoreUpdate.bind(this));
+        this.chatPermissionsStore.subscribe('overrides', this.processChatPermissionStoreUpdate);
 
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));

@@ -1,5 +1,5 @@
+import { DyteStore } from "@dytesdk/web-core";
 import { HandRaiseIcon } from "./HandRaiseButton";
-import { DyteStore } from "./type";
 
 export default class RaisedHand extends HTMLElement {
     _shadowRoot = undefined;
@@ -18,6 +18,7 @@ export default class RaisedHand extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ mode: "open" });
+        this.updateShowHand = this.updateShowHand.bind(this);
     }
 
     get participant() {
@@ -45,7 +46,7 @@ export default class RaisedHand extends HTMLElement {
     }
 
     disconnectedCallback() {
-        this.handRaisedStore.unsubscribe(this.participant.id, this.updateShowHand.bind(this));
+        this.handRaisedStore.unsubscribe(this.participant.id, this.updateShowHand);
     }
 
     updateShowHand() {
@@ -56,7 +57,7 @@ export default class RaisedHand extends HTMLElement {
     connectedCallback() {
         this.handRaisedStore = this.meeting.stores.stores.get('handRaise');
         this.raised = !!this.handRaisedStore.get(this.participant.id);
-        this.handRaisedStore.subscribe(this.participant.id, this.updateShowHand.bind(this));
+        this.handRaisedStore.subscribe(this.participant.id, this.updateShowHand);
         this.updateContent();
     }
 

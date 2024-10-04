@@ -2,8 +2,7 @@ import { UIConfig } from "@dytesdk/ui-kit";
 import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
-import { DyteStore } from "../hand-raise/type";
-import DyteClient from "@dytesdk/web-core";
+import DyteClient, { DyteStore } from "@dytesdk/web-core";
 
 export interface MicHostToggleProps {
     hostPresets: string[];
@@ -106,14 +105,13 @@ export default class MicHostToggle {
         this.targetPresets = targetPresets;
         this.hostPresets = hostPresets;
         this.addActionInParticipantMenu = addActionInParticipantMenu;
+        this.processMicPermissionStoreUpdate = this.processMicPermissionStoreUpdate.bind(this)
     }
 
     static async init(
         { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting }: MicHostToggleProps
     ){
         await meeting.stores.create('micPermissionsStore');
-        //@ts-ignore
-        await meeting.stores.stores.get('micPermissionsStore').updateRateLimits(10, 1);
         return new MicHostToggle({
             targetPresets,
             hostPresets,
@@ -180,7 +178,7 @@ export default class MicHostToggle {
 
     async unregister() {
         this.button.unregister();
-        this.micPermissionsStore.unsubscribe('overrides', this.processMicPermissionStoreUpdate.bind(this));
+        this.micPermissionsStore.unsubscribe('overrides', this.processMicPermissionStoreUpdate);
     }
 
     register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
@@ -192,7 +190,7 @@ export default class MicHostToggle {
         this.processMicPermissionStoreUpdate();
 
         // Subscribe to listen to new
-        this.micPermissionsStore.subscribe('overrides', this.processMicPermissionStoreUpdate.bind(this));
+        this.micPermissionsStore.subscribe('overrides', this.processMicPermissionStoreUpdate);
 
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));

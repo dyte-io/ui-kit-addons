@@ -1,4 +1,4 @@
-import { DyteStore } from "./type";
+import { DyteStore } from "@dytesdk/web-core";
 
 // svg string of raised hand
 export const HandRaiseIcon =
@@ -17,6 +17,7 @@ export class HandRaiseButton extends HTMLElement {
         super();
         // Create a shadow root
         this.shadow = this.attachShadow({ mode: "open" });
+        this.updateContent = this.updateContent.bind(this);
     }
 
     static get observedAttributes() {
@@ -89,10 +90,10 @@ export class HandRaiseButton extends HTMLElement {
         button.onclick = this.onClick.bind(this);
         this.shadow.appendChild(button);
         this.updateContent();
-        this.handRaisedStore.subscribe(this.meeting.self.id, this.updateContent.bind(this));
+        this.handRaisedStore.subscribe(this.meeting.self.id, this.updateContent);
     }
 
     disconnectedCallback(){
-        this.handRaisedStore.unsubscribe(this.meeting.self.id, this.updateContent.bind(this));
+        this.handRaisedStore.unsubscribe(this.meeting.self.id, this.updateContent);
     }
 }
