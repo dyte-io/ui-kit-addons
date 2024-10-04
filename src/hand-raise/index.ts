@@ -73,7 +73,6 @@ class HandRaiseAddon {
             });
         }
 
-
         // Add buttons with config
         const controlBarLeft = builder.find("div#controlbar-left");
         if (!controlBarLeft) return config;
