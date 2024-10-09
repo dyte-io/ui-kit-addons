@@ -1,3 +1,5 @@
+import { DyteStore } from '@dytesdk/web-core';
+
 const STYLES = `
     :host {
         display: flex;
@@ -74,9 +76,9 @@ export class HandRaisedList extends HTMLElement {
 
     _meeting = undefined;
 
-    _raised = window.DyteHandRaiseAddon.list || [];
-
     _onRemove = undefined;
+
+    handRaisedStore: DyteStore = undefined;
 
     constructor() {
         super();
@@ -85,6 +87,7 @@ export class HandRaisedList extends HTMLElement {
         const style = document.createElement("style");
         style.innerHTML = STYLES;
         this.shadow.appendChild(style);
+        this.updateContent = this.updateContent.bind(this);
     }
 
     static get observedAttributes() {
@@ -93,20 +96,12 @@ export class HandRaisedList extends HTMLElement {
 
     set meeting(meeting) {
         this._meeting = meeting;
+        this.handRaisedStore = meeting.stores.stores.get('handRaise');
         this.updateContent();
     }
 
     get meeting() {
         return this._meeting;
-    }
-
-    set raised(raised) {
-        this._raised = raised;
-        this.updateContent();
-    }
-
-    get raised() {
-        return this._raised;
     }
 
     set onRemove(onRemove) {
@@ -117,13 +112,7 @@ export class HandRaisedList extends HTMLElement {
         return this._onRemove;
     }
 
-    attributeChangedCallback(attr: string, _oldVal: any, newVal: any) {
-        if (attr === "meeting") {
-            this.meeting = newVal;
-        } else if (attr === "raised") {
-            this.raised = newVal;
-        }
-
+    attributeChangedCallback() {
         this.updateContent();
     }
 
@@ -164,7 +153,6 @@ export class HandRaisedList extends HTMLElement {
         lowerHand.variant = 'ghost';
         // @ts-ignore
         lowerHand.onclick = () => {
-            console.log('lower hand', participant.id, this._onRemove);
             this._onRemove ? this._onRemove(participant.id) : null;
         };
 
@@ -185,7 +173,12 @@ export class HandRaisedList extends HTMLElement {
     updateContent() {
         const ul = this.shadow.querySelector("ul.participants");
         ul.innerHTML = "";
-        this.raised.map((participantId) => {
+
+        const handRaiseData = this.handRaisedStore.getAll();
+        // Only filter raise hand as true
+        const raisedHands = Object.keys(handRaiseData).filter(key=>handRaiseData[key]);
+
+        raisedHands.map((participantId) => {
             const participant =
                 this.meeting.participants.joined.get(participantId);
             const self = this.meeting.self;
@@ -195,11 +188,6 @@ export class HandRaisedList extends HTMLElement {
                 ul.appendChild(this.participantItem(this.meeting.self));
             }
         });
-    }
-
-    updateShowHandList() {
-      const list = window.DyteHandRaiseAddon.list ?? [];
-      this.raised = list;
     }
 
     createContainer() {
@@ -219,6 +207,10 @@ export class HandRaisedList extends HTMLElement {
     connectedCallback() {
         this.createContainer();
         this.updateContent();
-        window.DyteHandRaiseAddon.pubsub?.subscribe("update-raise-hand", this.updateShowHandList.bind(this));
+        this.handRaisedStore.subscribe("*", this.updateContent);
+    }
+
+    disconnectedCallback(){
+        this.handRaisedStore.unsubscribe("*", this.updateContent);
     }
 }

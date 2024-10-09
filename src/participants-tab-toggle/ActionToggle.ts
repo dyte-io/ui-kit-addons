@@ -1,10 +1,11 @@
 class ActionToggle extends HTMLElement {
     shadow;
-    label = "Click me";
+    label = "Click me";    
     initialValue = () => false;
     state = false;
     onEnabled = () => {};
     onDisabled = () => {};
+    onStateChange: (cb: (state: boolean) => void) => void = () => {};
 
     constructor() {
         super();
@@ -77,7 +78,7 @@ class ActionToggle extends HTMLElement {
         return ele;
     }
 
-    create() {
+    render() {        
         const container = this.createElement("div", "action-container");
         const button = this.createElement(
             "dyte-switch",
@@ -98,10 +99,14 @@ class ActionToggle extends HTMLElement {
         container.innerText = this.label;
         container.appendChild(button);
         this.shadow.appendChild(container);
+        this.onStateChange((state) => {
+            this.state = state;
+            button.checked = state;
+        });
     }
 
     connectedCallback() {
-        this.create();
+        this.render();
     }
 }
 
