@@ -123,6 +123,13 @@ const micHostControl = await MicHostControl.init({
     targetPresets: ['webinar_viewer'],
     addActionInParticipantMenu: true,
 });
+
+const cameraHostControl = await CameraHostControl.init({
+    meeting,
+    hostPresets: ['webinar_presenter'],
+    targetPresets: ['webinar_viewer'],
+    addActionInParticipantMenu: true,
+});
 ```
 
 ## About
