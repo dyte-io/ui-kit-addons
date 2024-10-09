@@ -50,13 +50,13 @@ export default class RaisedHand extends HTMLElement {
     }
 
     updateShowHand() {
-        this.raised = !!this.handRaisedStore.get(this.participant.id);
+        this.raised = !!this.handRaisedStore.get(this.participant.id)?.raised;
         this.updateContent();
     }
 
     connectedCallback() {
         this.handRaisedStore = this.meeting.stores.stores.get('handRaise');
-        this.raised = !!this.handRaisedStore.get(this.participant.id);
+        this.raised = !!this.handRaisedStore.get(this.participant.id)?.raised;
         this.handRaisedStore.subscribe(this.participant.id, this.updateShowHand);
         this.updateContent();
     }

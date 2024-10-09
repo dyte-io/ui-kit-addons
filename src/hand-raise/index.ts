@@ -68,7 +68,7 @@ class HandRaiseAddon {
                 meeting: meeting,
                 // @ts-ignore
                 onRemove: (participantId: string) => {
-                    meeting.stores.stores.get('handRaise')?.set(participantId, false, true, true);
+                    meeting.stores.stores.get('handRaise')?.set(participantId, null, true, true);
                 }
             });
         }

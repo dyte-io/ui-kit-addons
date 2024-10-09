@@ -176,7 +176,9 @@ export class HandRaisedList extends HTMLElement {
 
         const handRaiseData = this.handRaisedStore.getAll();
         // Only filter raise hand as true
-        const raisedHands = Object.keys(handRaiseData).filter(key=>handRaiseData[key]);
+        const raisedHands = Object.keys(handRaiseData).filter(key=>handRaiseData[key]?.raised);
+
+        raisedHands.sort((participantId1, participantId2) => handRaiseData[participantId1].raisedOn - handRaiseData[participantId2].raisedOn);
 
         raisedHands.map((participantId) => {
             const participant =
