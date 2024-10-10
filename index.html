@@ -7,7 +7,7 @@
             content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"
         />
         <title>Dyte UI Kit Addons</title>
-        <script src="https://cdn.dyte.in/core/dyte-2.1.1.js"></script>
+        <script src="https://cdn.dyte.in/core/dyte-2.1.2.js"></script>
     </head>
     <body>
         <div id="root">
@@ -23,6 +23,7 @@
             import HandRaise from "/src/hand-raise/index.ts";
             import ChatHostControl from "/src/chat-host-control/index.ts";
             import MicHostControl from "/src/mic-host-control/index.ts";
+            import CameraHostControl from "/src/camera-host-control/index.ts";
 
             defineCustomElements();
 
@@ -76,8 +77,15 @@
                     addActionInParticipantMenu: true,
                 });
 
+                const cameraHostControl = await CameraHostControl.init({
+                    meeting,
+                    hostPresets: ['webinar_presenter'],
+                    targetPresets: ['webinar_viewer'],
+                    addActionInParticipantMenu: true,
+                });
+
                 const config = await registerAddons(
-                    [chatHostControl, micHostControl, videoBackground, tabAction, handRaise],
+                    [chatHostControl, micHostControl, cameraHostControl, videoBackground, tabAction, handRaise],
                     meeting
                 );
                 meetingRef.meeting = meeting;

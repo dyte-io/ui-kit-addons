@@ -57,20 +57,23 @@ export class HandRaiseButton extends HTMLElement {
     }
 
     onClick () {
-        let handRaised = !!this.handRaisedStore.get(this.meeting.self.id);
+        let handRaised = !!this.handRaisedStore.get(this.meeting.self.id)?.raised;
         handRaised = !handRaised;
 
         if(handRaised){
-            this.handRaisedStore.set(this.meeting.self.id, true, true, true);
+            this.handRaisedStore.set(this.meeting.self.id, {
+                raised: true,
+                raisedOn: new Date().getTime(),
+            }, true, true);
         } else {
-            this.handRaisedStore.set(this.meeting.self.id, false, true, true);
+            this.handRaisedStore.set(this.meeting.self.id, null, true, true);
         }
         this.updateContent();
         
     }
 
     updateContent(){
-        const handRaised = !!this.handRaisedStore.get(this.meeting.self.id);
+        const handRaised = !!this.handRaisedStore.get(this.meeting.self.id)?.raised;
         const button = this.shadowRoot.querySelector('dyte-controlbar-button');
         
         if (handRaised) {
