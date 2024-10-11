@@ -101,7 +101,7 @@ export default class MicHostToggle {
         }
     });
 
-    constructor({targetPresets, hostPresets, addActionInParticipantMenu}: MicHostToggleProps) {
+    private constructor({targetPresets, hostPresets, addActionInParticipantMenu}: MicHostToggleProps) {
         this.targetPresets = targetPresets;
         this.hostPresets = hostPresets;
         this.addActionInParticipantMenu = addActionInParticipantMenu;

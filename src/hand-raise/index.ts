@@ -31,7 +31,7 @@ class HandRaiseAddon {
     canRaiseHand = true;
     canManageRaisedHand = false;
 
-    constructor({ canRaiseHand, canManageRaisedHand, handRaiseIcon }: HandRaiseProps) {
+    private constructor({ canRaiseHand, canManageRaisedHand, handRaiseIcon }: HandRaiseProps) {
         this.canRaiseHand = canRaiseHand ?? true;
         this.canManageRaisedHand = canManageRaisedHand ?? false;
         if (customElements.get("dyte-raised-hand")) return;

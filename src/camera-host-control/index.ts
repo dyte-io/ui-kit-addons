@@ -101,7 +101,7 @@ export default class CameraHostToggle {
         }
     });
 
-    constructor({targetPresets, hostPresets, addActionInParticipantMenu}: CameraHostToggleProps) {
+    private constructor({targetPresets, hostPresets, addActionInParticipantMenu}: CameraHostToggleProps) {
         this.targetPresets = targetPresets;
         this.hostPresets = hostPresets;
         this.addActionInParticipantMenu = addActionInParticipantMenu;
