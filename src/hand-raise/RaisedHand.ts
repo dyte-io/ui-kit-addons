@@ -75,7 +75,7 @@ export default class RaisedHand extends HTMLElement {
         this.handRaisedStore = this.meeting.stores.stores.get('handRaise');
         this.raised = !!this.handRaisedStore.get(this.participant.id)?.raised;
         this.handRaisedStore.subscribe(this.participant.id, this.updateShowHand);
-        this.updateContent();
+        this.updateShowHand();
     }
 
     attributeChangedCallback() {

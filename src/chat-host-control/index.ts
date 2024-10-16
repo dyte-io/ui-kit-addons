@@ -110,7 +110,7 @@ export default class ChatHostToggle {
         }
     });
 
-    constructor(args: ChatHostToggleProps) {
+    private constructor(args: ChatHostToggleProps) {
         this.targetPresets = args.targetPresets;
         this.hostPresets = args.hostPresets;
         this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
