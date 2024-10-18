@@ -47,6 +47,9 @@ class HandRaiseAddon {
         { meeting, canRaiseHand = false, canManageRaisedHand = false, handRaiseIcon}: HandRaiseProps
     ){
         await meeting.stores.create('handRaise');
+        // NOTE(ishita1805): Type-casting pip for backward compatibility.
+        const { pip } = meeting.participants ?? { } as any;
+        if (pip?.overrideIcon) pip.overrideIcon('handRaise', handRaiseIcon);   
         return new HandRaiseAddon({
             canRaiseHand,
             canManageRaisedHand,
