@@ -65,6 +65,10 @@ const STYLES = `
       display: flex;
       align-items: center;
     }
+    .no-raised-hands {
+        display: flex;
+        justify-content: center;
+    }
 `;
 
 const removeIcon =
@@ -190,6 +194,14 @@ export class HandRaisedList extends HTMLElement {
                 ul.appendChild(this.participantItem(this.meeting.self));
             }
         });
+
+        if(!raisedHands?.length){
+            ul.innerHTML = `
+                <div class="no-raised-hands">
+                    There are no raised hands.
+              </div>
+            `;
+        }
     }
 
     createContainer() {
