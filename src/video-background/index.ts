@@ -148,9 +148,16 @@ export default class VideoBGAddon {
 
         // @ts-ignore
         changer.modes = this.modes;
+
+        changer['isVideoBackgroundBeingApplied'] = false;
+
         // @ts-ignore
         changer.onChange = async (mode: BackgroundMode, image?: string) => {
             if (!this.meeting || !transform) return;
+            if(changer['isVideoBackgroundBeingApplied']){
+                return;
+            }
+            changer['isVideoBackgroundBeingApplied'] =  true;
             if (this.middleware) {
                 await this.removeVideoVirtualBackground();
             }
@@ -166,6 +173,7 @@ export default class VideoBGAddon {
                     );
                 this.meeting.self.addVideoMiddleware(this.middleware);
             }
+            changer['isVideoBackgroundBeingApplied'] =  false;
         };
 
         if (this.selector) {
