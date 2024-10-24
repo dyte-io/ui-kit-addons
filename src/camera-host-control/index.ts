@@ -30,7 +30,7 @@ const cameraOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
  *  action = new CameraHostToggle({
  *     hostPresets: ["instructors", "moderators"],
  *     targetPresets: ["students"],
- *     addActionInParticipantMenu: true, // default false,
+ *     addActionInParticipantMenu: true, // default false
  *     actionLevel: 'PEER' // 'PEER' | 'PARTICIPANT' - default PEER
  *   });
  *  pass the action to the addon register function

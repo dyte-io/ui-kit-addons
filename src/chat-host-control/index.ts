@@ -154,7 +154,6 @@ export default class ChatHostToggle {
         if(participantId && !this.canBlockParticipant(participantId)){
             return;
         }
-        console.log('Blocking:: ', participantId);
         if (participantId) {
             const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
             const actionLevelId = this.actionLevel === 'PEER' ? participantId : participant.userId;

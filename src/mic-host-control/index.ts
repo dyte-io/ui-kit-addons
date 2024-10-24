@@ -116,13 +116,14 @@ export default class MicHostToggle {
     }
 
     static async init(
-        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting }: MicHostToggleProps
+        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting, actionLevel = 'PEER' }: MicHostToggleProps
     ){
         await meeting.stores.create('micPermissionsStore');
         return new MicHostToggle({
             targetPresets,
             hostPresets,
             addActionInParticipantMenu,
+            actionLevel,
             meeting
         });
     }
