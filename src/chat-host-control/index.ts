@@ -4,11 +4,14 @@ import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
 import DyteClient, { DyteStore } from "@dytesdk/web-core";
 
+export type ActionLevel = 'PEER' | 'PARTICIPANT';
+
 export interface ChatHostToggleProps {
     hostPresets: string[];
     targetPresets: string[];
     addActionInParticipantMenu: boolean;
     meeting: DyteClient;
+    actionLevel?: ActionLevel;
 }
 
 
@@ -29,6 +32,7 @@ const chatOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
  *     hostPresets: ["instructors", "moderators"],
  *     targetPresets: ["students"],
  *     addActionInParticipantMenu: true, // default false
+ *     actionLevel: 'PEER' // 'PEER' | 'PARTICIPANT' - default PEER
  *   });
  *  pass the action to the addon register function
  */
@@ -44,6 +48,8 @@ export default class ChatHostToggle {
     chatPermissionsStore: DyteStore = undefined;
 
     addActionInParticipantMenu = false;
+
+    actionLevel: ActionLevel = 'PEER';
 
     updateToggleWithoutAction: (state: boolean) => void = () => {};
 
@@ -99,14 +105,7 @@ export default class ChatHostToggle {
 
         onClick: (participantId) => {
             let isBlocked = this.isParticipantBlocked(participantId);
-            this.chatPermissionsStore.set(
-                "chatPermissionUpdate",
-                { targetId: participantId, canSend: isBlocked },
-                true,
-                true,
-            );
-            // toggle the state
-            this.updateBlockedParticipants(!isBlocked, participantId);
+            this.updateBlockedParticipantsInStore(!isBlocked, participantId);
         }
     });
 
@@ -114,32 +113,21 @@ export default class ChatHostToggle {
         this.targetPresets = args.targetPresets;
         this.hostPresets = args.hostPresets;
         this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
+        this.actionLevel = args.actionLevel;
         this.processChatPermissionStoreUpdate = this.processChatPermissionStoreUpdate.bind(this)
     }
 
     static async init(
-        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting }: ChatHostToggleProps
+        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting, actionLevel = 'PEER' }: ChatHostToggleProps
     ){
         await meeting.stores.create('chatPermissionsStore');
         return new ChatHostToggle({
             targetPresets,
             hostPresets,
             addActionInParticipantMenu,
+            actionLevel,
             meeting
         });
-    }
-
-    updateBlockedParticipants(state: boolean, participantId?: string) {
-        if (participantId) {
-            this.chatPermissionsStore.set('overrides', {
-                ...(this.chatPermissionsStore.get('overrides') || {}),
-                [participantId]: state,
-            }, true, true);
-        } else {
-            this.chatPermissionsStore.set('overrides', {
-                blockAll: state,
-            }, true, true);
-        }
     }
 
     canBlockParticipant(participantId: string){
@@ -151,8 +139,12 @@ export default class ChatHostToggle {
         if(!this.canBlockParticipant(participantId)){
             return false;
         }
-        if (this.chatPermissionsStore.get('overrides')?.[participantId] !== undefined) {
-            return !!(this.chatPermissionsStore.get('overrides')?.[participantId]);
+        
+        const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
+        const actionLevelId = this.actionLevel === 'PEER' ? participantId : participant.userId;
+
+        if (this.chatPermissionsStore.get('overrides')?.[actionLevelId] !== undefined) {
+            return !!(this.chatPermissionsStore.get('overrides')?.[actionLevelId]);
         }
         return !!this.chatPermissionsStore.get('overrides')?.blockAll;
     }
@@ -162,11 +154,18 @@ export default class ChatHostToggle {
         if(participantId && !this.canBlockParticipant(participantId)){
             return;
         }
+        console.log('Blocking:: ', participantId);
         if (participantId) {
+            const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
+            const actionLevelId = this.actionLevel === 'PEER' ? participantId : participant.userId;
+
+            console.log('Used action Level id:: ', actionLevelId);
+
             this.chatPermissionsStore.set('overrides', {
                 ...(this.chatPermissionsStore.get('overrides') || {}),
-                [participantId]: state,
+                [actionLevelId]: state,
             }, true, true);
+
         } else {
             this.chatPermissionsStore.set('overrides', {
                 blockAll: state,
