@@ -158,8 +158,6 @@ export default class ChatHostToggle {
             const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
             const actionLevelId = this.actionLevel === 'PEER' ? participantId : participant.userId;
 
-            console.log('Used action Level id:: ', actionLevelId);
-
             this.chatPermissionsStore.set('overrides', {
                 ...(this.chatPermissionsStore.get('overrides') || {}),
                 [actionLevelId]: state,
