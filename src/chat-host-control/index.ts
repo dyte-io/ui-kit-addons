@@ -4,14 +4,14 @@ import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
 import DyteClient, { DyteStore } from "@dytesdk/web-core";
 
-export type ActionLevel = 'PEER' | 'PARTICIPANT';
+export type UserBlockType = 'TEMPORARY' | 'PERSISTENT';
 
 export interface ChatHostToggleProps {
     hostPresets: string[];
     targetPresets: string[];
     addActionInParticipantMenu: boolean;
     meeting: DyteClient;
-    actionLevel?: ActionLevel;
+    userBlockType?: UserBlockType;
 }
 
 
@@ -32,7 +32,7 @@ const chatOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
  *     hostPresets: ["instructors", "moderators"],
  *     targetPresets: ["students"],
  *     addActionInParticipantMenu: true, // default false
- *     actionLevel: 'PEER' // 'PEER' | 'PARTICIPANT' - default PEER
+ *     userBlockType: 'TEMPORARY' // 'TEMPORARY' | 'PERSISTENT' - default TEMPORARY
  *   });
  *  pass the action to the addon register function
  */
@@ -49,7 +49,7 @@ export default class ChatHostToggle {
 
     addActionInParticipantMenu = false;
 
-    actionLevel: ActionLevel = 'PEER';
+    userBlockType: UserBlockType = 'TEMPORARY';
 
     updateToggleWithoutAction: (state: boolean) => void = () => {};
 
@@ -113,19 +113,19 @@ export default class ChatHostToggle {
         this.targetPresets = args.targetPresets;
         this.hostPresets = args.hostPresets;
         this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
-        this.actionLevel = args.actionLevel;
+        this.userBlockType = args.userBlockType;
         this.processChatPermissionStoreUpdate = this.processChatPermissionStoreUpdate.bind(this)
     }
 
     static async init(
-        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting, actionLevel = 'PEER' }: ChatHostToggleProps
+        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting, userBlockType = 'TEMPORARY' }: ChatHostToggleProps
     ){
         await meeting.stores.create('chatPermissionsStore');
         return new ChatHostToggle({
             targetPresets,
             hostPresets,
             addActionInParticipantMenu,
-            actionLevel,
+            userBlockType,
             meeting
         });
     }
@@ -141,10 +141,10 @@ export default class ChatHostToggle {
         }
         
         const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
-        const actionLevelId = this.actionLevel === 'PEER' ? participantId : participant.userId;
+        const blockTargetId = this.userBlockType === 'TEMPORARY' ? participantId : participant.userId;
 
-        if (this.chatPermissionsStore.get('overrides')?.[actionLevelId] !== undefined) {
-            return !!(this.chatPermissionsStore.get('overrides')?.[actionLevelId]);
+        if (this.chatPermissionsStore.get('overrides')?.[blockTargetId] !== undefined) {
+            return !!(this.chatPermissionsStore.get('overrides')?.[blockTargetId]);
         }
         return !!this.chatPermissionsStore.get('overrides')?.blockAll;
     }
@@ -156,11 +156,11 @@ export default class ChatHostToggle {
         }
         if (participantId) {
             const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
-            const actionLevelId = this.actionLevel === 'PEER' ? participantId : participant.userId;
+            const blockTargetId = this.userBlockType === 'TEMPORARY' ? participantId : participant.userId;
 
             this.chatPermissionsStore.set('overrides', {
                 ...(this.chatPermissionsStore.get('overrides') || {}),
-                [actionLevelId]: state,
+                [blockTargetId]: state,
             }, true, true);
 
         } else {

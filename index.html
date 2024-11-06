@@ -53,7 +53,10 @@
                     position: "start"
                 });
 
-                const meeting = await DyteClient.init({ authToken });
+                const meeting = await DyteClient.init({ authToken, modules: {
+                    devTools: {
+                    logs: true
+                }}});
 
                 const handRaise = await HandRaise.init({
                     meeting,
@@ -67,7 +70,7 @@
                     hostPresets: ['webinar_presenter'],
                     targetPresets: ['webinar_viewer'],
                     addActionInParticipantMenu: true,
-
+                    userBlockType: 'TEMPORARY',
                 });
 
                 const micHostControl = await MicHostControl.init({
