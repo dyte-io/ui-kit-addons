@@ -73,6 +73,15 @@ export default class VideoBGAddon {
         });
     }
 
+    getImageDataURLFromImage(img: HTMLImageElement) {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0);
+        return canvas.toDataURL();
+    }
+
     async getRandomImages(count: number) {
         const images = [];
         for await (const _ of Array(count < 10 ? count : 10)) {
@@ -152,7 +161,7 @@ export default class VideoBGAddon {
         changer['isVideoBackgroundBeingApplied'] = false;
 
         // @ts-ignore
-        changer.onChange = async (mode: BackgroundMode, image?: string) => {
+        changer.onChange = async (mode: BackgroundMode, image?: string, imageElement: HTMLImageElement) => {
             if (!this.meeting || !transform) return;
             if(changer['isVideoBackgroundBeingApplied']){
                 return;
@@ -167,11 +176,12 @@ export default class VideoBGAddon {
                     await transform.createBackgroundBlurVideoMiddleware();
                 await this.meeting.self.addVideoMiddleware(this.middleware);
             } else if (mode === "virtual" && image) {
+                const imageURL = this.getImageDataURLFromImage(imageElement);
                 this.middleware =
                     await transform.createStaticBackgroundVideoMiddleware(
-                        image
+                        imageURL,
                     );
-                this.meeting.self.addVideoMiddleware(this.middleware);
+                await this.meeting.self.addVideoMiddleware(this.middleware);
             }
             changer['isVideoBackgroundBeingApplied'] =  false;
         };
@@ -190,6 +200,7 @@ export default class VideoBGAddon {
         if (!transform && !initInProgress) {
             initInProgress = true;
             DyteVideoBackgroundTransformer.init({
+                // @ts-ignore
                 meeting,
                 segmentationConfig: this.segmentationConfig || {},
                 postProcessingConfig: this.postProcessingConfig || {},
