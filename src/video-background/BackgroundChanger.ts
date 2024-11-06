@@ -212,7 +212,7 @@ export class BackgroundChanger extends HTMLElement {
 
     set isVideoBackgroundBeingApplied(isBeingApplied: boolean){
         this._isVideoBackgroundBeingApplied = isBeingApplied;
-        this.shadow.querySelectorAll('.image-row')?.forEach((imageRow: HTMLImageElement) => {
+        this.shadow.querySelectorAll('.js-image-row')?.forEach((imageRow: HTMLImageElement) => {
             if(isBeingApplied){
                 imageRow.classList.add('video-background-update-ongoing');
             } else {
@@ -287,7 +287,7 @@ export class BackgroundChanger extends HTMLElement {
         if (!this._images || this._images.length === 0) return imageRows;
         this._images.map((image, i) => {
             const row = document.createElement("img");
-            row.setAttribute("class", "container image-container image-row js-image-loading");
+            row.setAttribute("class", "container image-container js-image-row js-image-loading");
             row.setAttribute("key", i.toString());
             row.setAttribute("crossOrigin", 'anonymous');
             row.setAttribute("src", image);
