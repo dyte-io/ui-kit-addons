@@ -8,6 +8,7 @@ export interface ParticipantTabToggleArgs {
     initialValue?: () => boolean;
     onEnabled: () => void;
     onDisabled: () => void;
+    onStateChange?: (callback: (state: boolean) => void) => void;
     attributes?: { [key: string]: any };
 }
 
@@ -51,6 +52,8 @@ export default class ParticipantTabToggle {
 
     initialValue: () => boolean = () => false;
 
+    onStateChange: (cb: (state: boolean) => {}) => void = () => {};
+
     constructor(args: ParticipantTabToggleArgs) {
         this.position = args.position;
         this.label = args.label;
@@ -59,6 +62,7 @@ export default class ParticipantTabToggle {
         if(args.initialValue){
             this.initialValue = args.initialValue
         }
+        this.onStateChange = args.onStateChange;
     }
 
     async unregister() {
@@ -88,6 +92,8 @@ export default class ParticipantTabToggle {
             label: this.label,
             // @ts-ignore
             initialValue: this.initialValue,
+            // @ts-ignore
+            onStateChange: this.onStateChange,
             // @ts-ignore
             onEnabled: this.onEnabled,
             // @ts-ignore

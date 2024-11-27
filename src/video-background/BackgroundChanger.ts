@@ -157,6 +157,12 @@ img {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+.video-background-update-ongoing{
+    cursor: wait !important;
+}
+.js-image-loading{
+    cursor: wait !important;
+}
 
 @container backgroundchanger (max-width: 300px) {
   #dialog {
@@ -177,13 +183,13 @@ export class BackgroundChanger extends HTMLElement {
     _images = [];
     _randomImages = [];
     _modes = ["blur", "virtual"];
-    _onchange: (mode: BackgroundMode, image?: string) => void = () => {};
+    _isVideoBackgroundBeingApplied = false;
+    _onchange: (mode: BackgroundMode, image?: string, imageElement?: HTMLImageElement) => void = () => {};
 
     constructor() {
         super();
         // Create a shadow root
         this.shadow = this.attachShadow({ mode: "open" });
-        this.createStyle();
     }
 
     set images(images) {
@@ -202,6 +208,21 @@ export class BackgroundChanger extends HTMLElement {
 
     get modes() {
         return this._modes;
+    }
+
+    set isVideoBackgroundBeingApplied(isBeingApplied: boolean){
+        this._isVideoBackgroundBeingApplied = isBeingApplied;
+        this.shadow.querySelectorAll('.js-image-row')?.forEach((imageRow: HTMLImageElement) => {
+            if(isBeingApplied){
+                imageRow.classList.add('video-background-update-ongoing');
+            } else {
+                imageRow.classList.remove('video-background-update-ongoing');
+            }
+        });
+    }
+
+    get isVideoBackgroundBeingApplied() {
+        return this._isVideoBackgroundBeingApplied;
     }
 
     set onChange(change: () => void) {
@@ -265,13 +286,22 @@ export class BackgroundChanger extends HTMLElement {
         const imageRows: any[] = [];
         if (!this._images || this._images.length === 0) return imageRows;
         this._images.map((image, i) => {
-            const row = document.createElement("div");
-            row.setAttribute("class", "container image-container");
+            const row = document.createElement("img");
+            row.setAttribute("class", "container image-container js-image-row js-image-loading");
             row.setAttribute("key", i.toString());
-            row.setAttribute("style", `--background: url('${image}')`);
+            row.setAttribute("crossOrigin", 'anonymous');
+            row.setAttribute("src", image);
             row.addEventListener("click", () => {
-                this._onchange("virtual", image);
+                if(row.complete){
+                    this._onchange("virtual", image, row);
+                }
             });
+            row.onload = () => {
+                row.classList.remove('js-image-loading');
+            }
+            if(this.isVideoBackgroundBeingApplied){
+                row.classList.add('video-background-update-ongoing');
+            }
             imageRows.push(row);
         });
         return imageRows;
@@ -280,6 +310,9 @@ export class BackgroundChanger extends HTMLElement {
     createContainer(type: BackgroundMode = "none") {
         const container = this.createElement("div", "container", "");
         const box = document.createElement("div");
+        if(this.isVideoBackgroundBeingApplied){
+            container.classList.add('video-background-update-ongoing');
+        }
         if (type === "blur") {
             box.innerHTML = BLUR_ICON;
             box.addEventListener("click", () => {
@@ -329,6 +362,8 @@ export class BackgroundChanger extends HTMLElement {
     }
 
     create() {
+        this.shadow.innerHTML = '';
+        this.createStyle();
         const dialog = this.createDialog();
         const header = this.createHeader();
         const dismissButton = this.createDismissButton();
@@ -340,15 +375,11 @@ export class BackgroundChanger extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["images", "modes"];
+        return ["images", "modes", "isVideoBackgroundBeingApplied"];
     }
 
-    attributeChangedCallback(attr: string, oldVal: any, newVal: any) {
-        if (oldVal === newVal) return;
-        switch (attr) {
-            case "images":
-                break;
-        }
+    attributeChangedCallback() {
+        this.create();
     }
 
     connectedCallback() {

@@ -2,34 +2,21 @@ import { UIConfig } from "@dytesdk/ui-kit";
 import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
 import DyteToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
-import PubSub from "../utils/PubSub";
+import DyteClient, { DyteStore } from "@dytesdk/web-core";
 
-interface Overrides {
-    [key: string]: boolean;
-}
-declare global {
-    interface Window {
-        DyteChatHostControlAddon: {
-            overrides: Overrides;
-            blockAll: boolean;
-            pubsub?: PubSub;
-        };
-    }
-}
+export type UserBlockType = 'TEMPORARY' | 'PERSISTENT';
 
-export interface ChatHostToggleArgs {
+export interface ChatHostToggleProps {
     hostPresets: string[];
     targetPresets: string[];
+    addActionInParticipantMenu: boolean;
+    meeting: DyteClient;
+    userBlockType?: UserBlockType;
 }
 
 
 const chatOffIcon = `<svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3.28 2.22a.75.75 0 1 0-1.06 1.06l2.198 2.2A9.96 9.96 0 0 0 2 12a9.96 9.96 0 0 0 1.115 4.592l-1.068 3.823a1.25 1.25 0 0 0 1.54 1.54l3.826-1.067A9.96 9.96 0 0 0 12 22c2.491 0 4.77-.911 6.52-2.418l2.2 2.198a.75.75 0 0 0 1.06-1.06L3.28 2.22Zm14.177 16.298A8.466 8.466 0 0 1 12 20.5a8.458 8.458 0 0 1-4.133-1.07l-.27-.15-3.986 1.111 1.113-3.984-.151-.27A8.458 8.458 0 0 1 3.5 12c0-2.077.745-3.98 1.983-5.457l3.004 3.005A.75.75 0 0 0 8.75 11h1.19l2 2H8.75l-.102.007A.75.75 0 0 0 8.75 14.5h4.498l.102-.007a.76.76 0 0 0 .07-.013l4.037 4.038ZM15.255 9.5h-2.573l1.5 1.5h1.072l.102-.007a.75.75 0 0 0-.101-1.493Z" fill="currentColor"/><path d="M20.5 12c0 1.53-.404 2.966-1.112 4.206l1.094 1.094A9.953 9.953 0 0 0 22 12c0-5.523-4.477-10-10-10a9.953 9.953 0 0 0-5.3 1.518l1.094 1.094A8.5 8.5 0 0 1 20.5 12Z" fill="currentColor"/></svg>`;
 const chatOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10a9.96 9.96 0 0 1-4.587-1.112l-3.826 1.067a1.25 1.25 0 0 1-1.54-1.54l1.068-3.823A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2Zm0 1.5A8.5 8.5 0 0 0 3.5 12c0 1.47.373 2.883 1.073 4.137l.15.27-1.112 3.984 3.987-1.112.27.15A8.5 8.5 0 1 0 12 3.5ZM8.75 13h4.498a.75.75 0 0 1 .102 1.493l-.102.007H8.75a.75.75 0 0 1-.102-1.493L8.75 13h4.498H8.75Zm0-3.5h6.505a.75.75 0 0 1 .101 1.493l-.101.007H8.75a.75.75 0 0 1-.102-1.493L8.75 9.5h6.505H8.75Z" fill="currentColor"/></svg>`;
-window.DyteChatHostControlAddon = {
-    overrides: {},
-    blockAll: false,
-    pubsub: undefined
-};
 
 /**
  * This class is used to add a public chat enable / disable host control
@@ -43,7 +30,9 @@ window.DyteChatHostControlAddon = {
  * @example
  *  action = new ChatHostToggle({
  *     hostPresets: ["instructors", "moderators"],
- *     targetPresets: ["students"]
+ *     targetPresets: ["students"],
+ *     addActionInParticipantMenu: true, // default false
+ *     userBlockType: 'TEMPORARY' // 'TEMPORARY' | 'PERSISTENT' - default TEMPORARY
  *   });
  *  pass the action to the addon register function
  */
@@ -54,145 +43,200 @@ export default class ChatHostToggle {
 
     targetPresets: string[];
 
-    sendTimeout: any;
-
     state = true;
+
+    chatPermissionsStore: DyteStore = undefined;
+
+    addActionInParticipantMenu = false;
+
+    userBlockType: UserBlockType = 'TEMPORARY';
+
+    updateToggleWithoutAction: (state: boolean) => void = () => {};
 
     button = new DyteToggle({
         position: "start",
         label: "Chat",
-        initialValue: () => this.state,
         onEnabled: () => {
             this.state = true;
-            if (this.sendTimeout) {
-                clearInterval(this.sendTimeout);
-            }
-            this.targetPresets.forEach((p) => {
-                this.meeting?.participants.broadcastMessage(
-                    "chatPermissionUpdate",
-                    { targetPreset: p, canSend: true }
-                );
-            });
-            this.updateBlockedParticipants(!this.state);
+            this.updateBlockedParticipantsInStore(false);
         },
         onDisabled: () => {
             this.state = false;
-            if (this.sendTimeout) {
-                clearInterval(this.sendTimeout);
-            }
-            const disableChat = () => {
-                this.targetPresets.forEach((p) => {
-                    this.meeting?.participants.broadcastMessage(
-                        "chatPermissionUpdate",
-                        { targetPreset: p, canSend: false }
-                    );
-                });
-            };
-            this.sendTimeout = setInterval(disableChat, 5000);
-            disableChat();
-            this.updateBlockedParticipants(!this.state);
+            this.updateBlockedParticipantsInStore(true);
+        },
+        onStateChange: (cb) => {
+            this.updateToggleWithoutAction = cb;
+            cb(this.state);
         }
+        
     });
 
     menuItem = new ParticipantMenuItem({
         label: "Disable Chat",
         icon: chatOffIcon,
+        styles: `
+            .disabled{
+                cursor: not-allowed;
+            }
+            .red{
+                color: red;
+            }
+        `,
         onStateChange: (participantId, callback) => {
-            return window.DyteChatHostControlAddon.pubsub?.subscribe(
-                'chatPermissionUpdate',
+            const isBlocked = this.isParticipantBlocked(participantId);
+            callback({
+                label: isBlocked ? "Enable Chat": "Disable Chat",
+                icon: isBlocked ? chatOnIcon : chatOffIcon,
+                iconClass: isBlocked ? "" : "red",
+                labelClass: `${isBlocked ? "" : "red"} ${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
+            });
+            return this.chatPermissionsStore.subscribe(
+                'overrides',
                 () => {
                     const isBlocked = this.isParticipantBlocked(participantId);
                     callback({
                         label: isBlocked ? "Enable Chat": "Disable Chat",
                         icon: isBlocked ? chatOnIcon : chatOffIcon,
-                        iconClass: isBlocked ? "" : "red-icon"
+                        iconClass: isBlocked ? "" : "red",
+                        labelClass: `${isBlocked ? "" : "red"} ${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
                     });
                 });
         },
 
         onClick: (participantId) => {
             let isBlocked = this.isParticipantBlocked(participantId);
-            this.meeting?.participants.broadcastMessage(
-                "chatPermissionUpdate",
-                { targetId: participantId, canSend: isBlocked }
-            );
-            // toggle the state
-            this.updateBlockedParticipants(!isBlocked, participantId);
+            this.updateBlockedParticipantsInStore(!isBlocked, participantId);
         }
     });
 
-    constructor(args: ChatHostToggleArgs) {
+    private constructor(args: ChatHostToggleProps) {
         this.targetPresets = args.targetPresets;
         this.hostPresets = args.hostPresets;
-        window.DyteChatHostControlAddon.pubsub = new PubSub();
+        this.addActionInParticipantMenu = args.addActionInParticipantMenu || false;
+        this.userBlockType = args.userBlockType;
+        this.processChatPermissionStoreUpdate = this.processChatPermissionStoreUpdate.bind(this)
     }
 
-    // if overrides are present, and the participant is not blocked, return false
-    // if overrides are present, and the participant is blocked, return true
-    // if overrides are not present, and blockAll is true, return true
-    // if overrides are not present, and blockAll is false, return false
+    static async init(
+        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting, userBlockType = 'TEMPORARY' }: ChatHostToggleProps
+    ){
+        await meeting.stores.create('chatPermissionsStore');
+        return new ChatHostToggle({
+            targetPresets,
+            hostPresets,
+            addActionInParticipantMenu,
+            userBlockType,
+            meeting
+        });
+    }
+
+    canBlockParticipant(participantId: string){
+        const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
+        return this.targetPresets.includes(participant.presetName);
+    }
 
     isParticipantBlocked(participantId: string) {
-        if (window.DyteChatHostControlAddon.overrides[participantId] !== undefined) {
-            return window.DyteChatHostControlAddon.overrides[participantId];
+        if(!this.canBlockParticipant(participantId)){
+            return false;
         }
-        return window.DyteChatHostControlAddon.blockAll;
+        
+        const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
+        const blockTargetId = this.userBlockType === 'TEMPORARY' ? participantId : participant.userId;
+
+        if (this.chatPermissionsStore.get('overrides')?.[blockTargetId] !== undefined) {
+            return !!(this.chatPermissionsStore.get('overrides')?.[blockTargetId]);
+        }
+        return !!this.chatPermissionsStore.get('overrides')?.blockAll;
     }
 
-    updateBlockedParticipants(state: boolean, participantId?: string) {
+    updateBlockedParticipantsInStore(state: boolean, participantId?: string) {
+        
+        if(participantId && !this.canBlockParticipant(participantId)){
+            return;
+        }
         if (participantId) {
-            window.DyteChatHostControlAddon.overrides[participantId] = state;
-        } else {
-            window.DyteChatHostControlAddon.blockAll = state;
-        }
-        window.DyteChatHostControlAddon.pubsub.publish('chatPermissionUpdate', {});
-    }
+            const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
+            const blockTargetId = this.userBlockType === 'TEMPORARY' ? participantId : participant.userId;
 
-    onBroadcastMessage({ type, payload }: { type: string; payload: any }) {
-        if (
-            type === "chatPermissionUpdate" &&
-            (payload.targetPreset === this.meeting?.self.presetName ||
-                payload.targetId === this.meeting?.self.id)
-        ) {
-            const state = payload.canSend;
-            Object.defineProperty(
-                this.meeting?.self.permissions.chatPublic,
-                "canSend",
-                {
-                    value: state
-                }
-            );
-            Object.defineProperty(
-                this.meeting?.self.permissions.chatPublic,
-                "text",
-                {
-                    value: state
-                }
-            );
-            Object.defineProperty(
-                this.meeting?.self.permissions.chatPublic,
-                "files",
-                {
-                    value: state
-                }
-            );
-            this.meeting?.self.permissions.emit("*");
+            this.chatPermissionsStore.set('overrides', {
+                ...(this.chatPermissionsStore.get('overrides') || {}),
+                [blockTargetId]: state,
+            }, true, true);
+
+        } else {
+            this.chatPermissionsStore.set('overrides', {
+                blockAll: state,
+            }, true, true);
         }
+    }
+    updatePermissionsInUILocally({state}: {state: boolean}){
+        Object.defineProperty(
+            this.meeting?.self.permissions.chatPublic,
+            "canSend",
+            {
+                value: state
+            }
+        );
+        Object.defineProperty(
+            this.meeting?.self.permissions.chatPublic,
+            "canReceive",
+            {
+                value: true
+            }
+        );
+        Object.defineProperty(
+            this.meeting?.self.permissions.chatPublic,
+            "text",
+            {
+                value: state
+            }
+        );
+        Object.defineProperty(
+            this.meeting?.self.permissions.chatPublic,
+            "files",
+            {
+                value: state
+            }
+        );
+        this.meeting?.self.permissions.emit("*");
+    }
+    processChatPermissionStoreUpdate(){
+        this.state = !this.chatPermissionsStore.get('overrides')?.blockAll;
+        this.updateToggleWithoutAction(this.state);
+
+        if(!this.canBlockParticipant(this.meeting.self.id)){
+            return;
+        }
+        
+        const isBlocked = this.isParticipantBlocked(this.meeting.self.id);
+
+        this.updatePermissionsInUILocally({
+            state:  !isBlocked,
+        });
     }
 
     async unregister() {
-        // TODO: Remove the changer from the body
+        this.button.unregister();
+        this.chatPermissionsStore.unsubscribe('overrides', this.processChatPermissionStoreUpdate);
     }
 
     register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
         this.meeting = meeting;
-        meeting.participants.on(
-            "broadcastedMessage",
-            this.onBroadcastMessage.bind(this)
-        );
+        
+        this.chatPermissionsStore = meeting.stores.stores.get('chatPermissionsStore');
+        
+        // Set default values
+        this.state = !this.chatPermissionsStore.get('overrides')?.blockAll;
+        this.processChatPermissionStoreUpdate();
+
+        // Subscribe to listen to new
+        this.chatPermissionsStore.subscribe('overrides', this.processChatPermissionStoreUpdate);
+
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));
-            // return this.menuItem.register(config, meeting , () => getBuilder(config));
+            if(this.addActionInParticipantMenu){
+                return this.menuItem.register(config, meeting , () => getBuilder(config));
+            }
         }
 
         return config;

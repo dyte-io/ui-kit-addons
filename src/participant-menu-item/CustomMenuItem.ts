@@ -78,7 +78,7 @@ export default class CustomMenuItem extends HTMLElement {
         if (this.icon || this.state.icon) {
             const icon = document.createElement("dyte-icon");
             icon.setAttribute("icon", this.state.icon || this.icon);
-            icon.className = this.state.iconClass || "red-icon";
+            icon.className = this.state.iconClass || "";
             icon.setAttribute("size", "md");
             icon.setAttribute("slot", "start");
             container.appendChild(icon);

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import p from './package.json'
 
-const deps = [...Object.keys(p.dependencies), ...Object.keys(p.peerDependencies) ];
+const deps = [...Object.keys(p.peerDependencies) ];
 
 export default defineConfig({
   build: {
@@ -20,6 +20,8 @@ export default defineConfig({
         'mic-host-control': "./src/mic-host-control/index.ts",
         'participant-menu-item': "./src/participant-menu-item/index.ts",
         'custom-fullscreen-element': "./src/custom-fullscreen-element/index.ts"
+        'camera-host-control': "./src/camera-host-control/index.ts",
+        'participant-tile-menu': "./src/participant-tile-menu/index.ts"
       },
     },
     rollupOptions: {

@@ -6,28 +6,28 @@ import DyteClient, { DyteStore } from "@dytesdk/web-core";
 
 export type UserBlockType = 'TEMPORARY' | 'PERSISTENT';
 
-export interface MicHostToggleProps {
+export interface CameraHostToggleProps {
     hostPresets: string[];
     targetPresets: string[];
     addActionInParticipantMenu?: boolean;
-    meeting: DyteClient
+    meeting: DyteClient;
     userBlockType?: UserBlockType;
 }
 
-const micOffIcon = `<svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.175 15.996A6.513 6.513 0 0 1 15 11.498V6a4 4 0 0 0-8 0v6a4 4 0 0 0 4.175 3.996Z" fill="currentColor"/><path d="M11 17.5c0 1.096.271 2.129.75 3.035v.715a.75.75 0 0 1-1.493.102l-.007-.102v-2.268a6.75 6.75 0 0 1-6.246-6.496L4 12.25v-.5a.75.75 0 0 1 1.493-.102l.007.102v.5a5.25 5.25 0 0 0 5.034 5.246l.216.004H11ZM23 17.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Zm-9.5 0c0 .834.255 1.608.691 2.248l5.557-5.557A4 4 0 0 0 13.5 17.5Zm4 4a4 4 0 0 0 3.309-6.248l-5.557 5.557c.64.436 1.414.691 2.248.691Z" fill="currentColor"/></svg>`;
-const micOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.25 11a.75.75 0 0 1 .743.648l.007.102v.5a6.75 6.75 0 0 1-6.249 6.732l-.001 2.268a.75.75 0 0 1-1.493.102l-.007-.102v-2.268a6.75 6.75 0 0 1-6.246-6.496L5 12.25v-.5a.75.75 0 0 1 1.493-.102l.007.102v.5a5.25 5.25 0 0 0 5.034 5.246l.216.004h.5a5.25 5.25 0 0 0 5.246-5.034l.004-.216v-.5a.75.75 0 0 1 .75-.75ZM12 2a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Zm0 1.5A2.5 2.5 0 0 0 9.5 6v6a2.5 2.5 0 0 0 5 0V6A2.5 2.5 0 0 0 12 3.5Z" fill="currentColor"/></svg>`;
+const cameraOffIcon = `<svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.175 15.996A6.513 6.513 0 0 1 15 11.498V6a4 4 0 0 0-8 0v6a4 4 0 0 0 4.175 3.996Z" fill="currentColor"/><path d="M11 17.5c0 1.096.271 2.129.75 3.035v.715a.75.75 0 0 1-1.493.102l-.007-.102v-2.268a6.75 6.75 0 0 1-6.246-6.496L4 12.25v-.5a.75.75 0 0 1 1.493-.102l.007.102v.5a5.25 5.25 0 0 0 5.034 5.246l.216.004H11ZM23 17.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0Zm-9.5 0c0 .834.255 1.608.691 2.248l5.557-5.557A4 4 0 0 0 13.5 17.5Zm4 4a4 4 0 0 0 3.309-6.248l-5.557 5.557c.64.436 1.414.691 2.248.691Z" fill="currentColor"/></svg>`;
+const cameraOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.25 11a.75.75 0 0 1 .743.648l.007.102v.5a6.75 6.75 0 0 1-6.249 6.732l-.001 2.268a.75.75 0 0 1-1.493.102l-.007-.102v-2.268a6.75 6.75 0 0 1-6.246-6.496L5 12.25v-.5a.75.75 0 0 1 1.493-.102l.007.102v.5a5.25 5.25 0 0 0 5.034 5.246l.216.004h.5a5.25 5.25 0 0 0 5.246-5.034l.004-.216v-.5a.75.75 0 0 1 .75-.75ZM12 2a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4Zm0 1.5A2.5 2.5 0 0 0 9.5 6v6a2.5 2.5 0 0 0 5 0V6A2.5 2.5 0 0 0 12 3.5Z" fill="currentColor"/></svg>`;
 
 /**
- * This class is used to add a microphone enable / disable host control
+ * This class is used to add a camera enable / disable host control
  *
  * @param {Array} args.hostPresets - The host presets who can trigger this control
  *
- * @param {Array} args.targetPresets - The presets whose mic will controlled
+ * @param {Array} args.targetPresets - The presets whose camera will controlled
  *
  * @returns {UIConfig} modified config
  *
  * @example
- *  action = new MicHostToggle({
+ *  action = new CameraHostToggle({
  *     hostPresets: ["instructors", "moderators"],
  *     targetPresets: ["students"],
  *     addActionInParticipantMenu: true, // default false
@@ -35,7 +35,7 @@ const micOnIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><
  *   });
  *  pass the action to the addon register function
  */
-export default class MicHostToggle {
+export default class CameraHostToggle {
     meeting?: Meeting;
 
     hostPresets: string[];
@@ -44,7 +44,7 @@ export default class MicHostToggle {
 
     state = true;
 
-    micPermissionsStore: DyteStore = undefined;
+    cameraPermissionsStore: DyteStore = undefined;
 
     addActionInParticipantMenu = false;
 
@@ -54,7 +54,7 @@ export default class MicHostToggle {
 
     button = new DyteToggle({
         position: "start",
-        label: "Microphone",
+        label: "Camera",
         onEnabled: () => {
             this.state = true;
             this.updateBlockedParticipantsInStore(false);
@@ -70,8 +70,8 @@ export default class MicHostToggle {
     });
 
     menuItem = new ParticipantMenuItem({
-        label: "Disable Mic",
-        icon: micOffIcon,
+        label: "Disable Camera",
+        icon: cameraOffIcon,
         styles: `
         .disabled{
             cursor: not-allowed;
@@ -83,18 +83,18 @@ export default class MicHostToggle {
         onStateChange: (participantId, callback) => {
             const isBlocked = this.isParticipantBlocked(participantId);
             callback({
-                label: isBlocked ? "Enable Mic" : "Disable Mic",
-                icon: isBlocked ? micOnIcon : micOffIcon,
+                label: isBlocked ? "Enable Camera" : "Disable Camera",
+                icon: isBlocked ? cameraOnIcon : cameraOffIcon,
                 iconClass: isBlocked ? "" : "red-icon",
                 labelClass: `${isBlocked ? "" : "red"} ${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
             });
-            return this.micPermissionsStore.subscribe(
+            return this.cameraPermissionsStore.subscribe(
                 'overrides',
                 () => {
                     const isBlocked = this.isParticipantBlocked(participantId);
                     callback({
-                        label: isBlocked ? "Enable Mic" : "Disable Mic",
-                        icon: isBlocked ? micOnIcon : micOffIcon,
+                        label: isBlocked ? "Enable Camera" : "Disable Camera",
+                        icon: isBlocked ? cameraOnIcon : cameraOffIcon,
                         iconClass: isBlocked ? "" : "red-icon",
                         labelClass: `${isBlocked ? "" : "red"} ${this.canBlockParticipant(participantId) ? '' : 'disabled'}`
                     });
@@ -107,19 +107,19 @@ export default class MicHostToggle {
         }
     });
 
-    private constructor({targetPresets, hostPresets, addActionInParticipantMenu, userBlockType}: MicHostToggleProps) {
+    private constructor({targetPresets, hostPresets, addActionInParticipantMenu, userBlockType}: CameraHostToggleProps) {
         this.targetPresets = targetPresets;
         this.hostPresets = hostPresets;
         this.addActionInParticipantMenu = addActionInParticipantMenu;
         this.userBlockType = userBlockType;
-        this.processMicPermissionStoreUpdate = this.processMicPermissionStoreUpdate.bind(this)
+        this.processCameraPermissionStoreUpdate = this.processCameraPermissionStoreUpdate.bind(this)
     }
 
     static async init(
-        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting, userBlockType = 'TEMPORARY' }: MicHostToggleProps
+        { targetPresets, hostPresets, addActionInParticipantMenu = false, meeting, userBlockType = 'TEMPORARY' }: CameraHostToggleProps
     ){
-        await meeting.stores.create('micPermissionsStore');
-        return new MicHostToggle({
+        await meeting.stores.create('cameraPermissionsStore');
+        return new CameraHostToggle({
             targetPresets,
             hostPresets,
             addActionInParticipantMenu,
@@ -137,14 +137,12 @@ export default class MicHostToggle {
         if(!this.canBlockParticipant(participantId)){
             return false;
         }
-
         const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
         const blockTargetId = this.userBlockType === 'TEMPORARY' ? participantId : participant.userId;
-
-        if (this.micPermissionsStore.get('overrides')?.[blockTargetId] !== undefined) {
-            return !!(this.micPermissionsStore.get('overrides')?.[blockTargetId]);
+        if (this.cameraPermissionsStore.get('overrides')?.[blockTargetId] !== undefined) {
+            return !!(this.cameraPermissionsStore.get('overrides')?.[blockTargetId]);
         }
-        return !!this.micPermissionsStore.get('overrides')?.blockAll;
+        return !!this.cameraPermissionsStore.get('overrides')?.blockAll;
     }
 
     updateBlockedParticipantsInStore(state: boolean, participantId?: string) {
@@ -153,16 +151,14 @@ export default class MicHostToggle {
             return;
         }
         if (participantId) {
-            
             const participant = this.meeting.self.id === participantId ? this.meeting.self : this.meeting.participants.joined.get(participantId);
             const blockTargetId = this.userBlockType === 'TEMPORARY' ? participantId : participant.userId;
-
-            this.micPermissionsStore.set('overrides', {
-                ...(this.micPermissionsStore.get('overrides') || {}),
+            this.cameraPermissionsStore.set('overrides', {
+                ...(this.cameraPermissionsStore.get('overrides') || {}),
                 [blockTargetId]: state,
             }, true, true);
         } else {
-            this.micPermissionsStore.set('overrides', {
+            this.cameraPermissionsStore.set('overrides', {
                 blockAll: state,
             }, true, true);
         }
@@ -170,16 +166,16 @@ export default class MicHostToggle {
     updatePermissionsInUILocally({state}: {state: 'ALLOWED' | 'NOT_ALLOWED'}){
         Object.defineProperty(
             this.meeting?.self.permissions,
-            "canProduceAudio", {
+            "canProduceVideo", {
                 value: state,
                 configurable: true
             }
         );
         // @ts-ignore
-        this.meeting?.self.permissions.emit("permissionsUpdate", { media: { audio: { canProduce: state}}});
+        this.meeting?.self.permissions.emit("permissionsUpdate", { media: { video: { canProduce: state}}});
     }
-    processMicPermissionStoreUpdate(){
-        this.state = !this.micPermissionsStore.get('overrides')?.blockAll;
+    processCameraPermissionStoreUpdate(){
+        this.state = !this.cameraPermissionsStore.get('overrides')?.blockAll;
         this.updateToggleWithoutAction(this.state);
 
         if(!this.canBlockParticipant(this.meeting.self.id)){
@@ -194,19 +190,19 @@ export default class MicHostToggle {
 
     async unregister() {
         this.button.unregister();
-        this.micPermissionsStore.unsubscribe('overrides', this.processMicPermissionStoreUpdate);
+        this.cameraPermissionsStore.unsubscribe('overrides', this.processCameraPermissionStoreUpdate);
     }
 
     register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => any) {
         this.meeting = meeting;
-        this.micPermissionsStore = meeting.stores.stores.get('micPermissionsStore');
+        this.cameraPermissionsStore = meeting.stores.stores.get('cameraPermissionsStore');
         
         // Set default values
-        this.state = !this.micPermissionsStore.get('overrides')?.blockAll;
-        this.processMicPermissionStoreUpdate();
+        this.state = !this.cameraPermissionsStore.get('overrides')?.blockAll;
+        this.processCameraPermissionStoreUpdate();
 
         // Subscribe to listen to new
-        this.micPermissionsStore.subscribe('overrides', this.processMicPermissionStoreUpdate);
+        this.cameraPermissionsStore.subscribe('overrides', this.processCameraPermissionStoreUpdate);
 
         if (this.hostPresets.includes(meeting.self.presetName)) {
             config = this.button.register(config, meeting, () => getBuilder(config));

@@ -1,9 +1,15 @@
+import { DyteStore } from "@dytesdk/web-core";
 import { HandRaiseIcon } from "./HandRaiseButton";
 
 export default class RaisedHand extends HTMLElement {
     _shadowRoot = undefined;
     _participant = undefined;
     _raised = false;
+    _meeting = undefined;
+    
+    handRaisedStore: DyteStore = undefined;
+    
+    static icon = HandRaiseIcon;
 
     static get observedAttributes() {
         return ["raised"];
@@ -12,6 +18,7 @@ export default class RaisedHand extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ mode: "open" });
+        this.updateShowHand = this.updateShowHand.bind(this);
     }
 
     get participant() {
@@ -20,6 +27,14 @@ export default class RaisedHand extends HTMLElement {
 
     set participant(participant) {
         this._participant = participant;
+    }
+
+    set meeting(meeting) {
+        this._meeting = meeting;
+    }
+
+    get meeting() {
+        return this._meeting;
     }
 
     get raised() {
@@ -31,19 +46,36 @@ export default class RaisedHand extends HTMLElement {
     }
 
     disconnectedCallback() {
-        window.DyteHandRaiseAddon.pubsub?.unsubscribe("update-raise-hand", this.updateShowHand.bind(this));
+        this.handRaisedStore.unsubscribe(this.participant.id, this.updateShowHand);
     }
 
-    updateShowHand(data: any) {
-        if (data.participantId === this.participant.id) {
-            this.raised = data.raised;
-            this.updateContent();
-        }
+    updateShowHand() {
+        this.raised = !!this.handRaisedStore.get(this.participant.id)?.raised;
+        this.updateContent();
+
+        const participant = this.participant.id === this.meeting.self.id ? this.meeting.self : this.meeting.participants.joined.get(this.participant.id);
+        
+        /**
+         * NOTE(ravindra-dyte): this is needed since PIP of web-core relies on this
+         * In future, Web Core should also start using DyteStore
+        */
+        participant.raised = this.raised;
+
+        /**
+         * NOTE(ravindra-dyte): These PIP related lines are needed to show hand raise in PIP
+         * */
+        const pip = this.meeting.participants.pip;
+        pip.updateSource && pip.updateSource(participant.id, {
+            handRaised: this.raised
+        });
+
     }
 
     connectedCallback() {
-        window.DyteHandRaiseAddon.pubsub?.subscribe("update-raise-hand", this.updateShowHand.bind(this));
-        this.raised = window.DyteHandRaiseAddon.list?.includes(this.participant.id);
+        this.handRaisedStore = this.meeting.stores.stores.get('handRaise');
+        this.raised = !!this.handRaisedStore.get(this.participant.id)?.raised;
+        this.handRaisedStore.subscribe(this.participant.id, this.updateShowHand);
+        this.updateShowHand();
     }
 
     attributeChangedCallback() {
@@ -59,7 +91,7 @@ export default class RaisedHand extends HTMLElement {
 		}
 	  </style>
 	  <div style="position: absolute; top: 5px; right: 5px; height: 32px; width: 32px;">
-		  ${HandRaiseIcon}
+		  ${RaisedHand.icon}
 	  </div>
 	`;
     }
