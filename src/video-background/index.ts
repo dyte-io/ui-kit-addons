@@ -6,13 +6,11 @@ import { BackgroundChanger } from "./BackgroundChanger";
 import { PostProcessingConfig } from "@dytesdk/video-background-transformer/types/client/DyteVideoBackgroundTransformer";
 import { SegmentationConfig } from "@dytesdk/video-background-transformer/types/core/helpers/segmentationHelper";
 
-let transform: DyteVideoBackgroundTransformer | null = null;
-let initInProgress = false;
-
 export interface VideoBGAddonArgs {
     images?: string[];
     modes?: BackgroundMode[];
     randomCount?: number;
+    blurLength?: number;
     selector?: string;
     buttonIcon?: string;
     segmentationConfig?: Partial<SegmentationConfig>;
@@ -37,6 +35,7 @@ const defaultIcon =
 export default class VideoBGAddon {
     images: string[];
     randomCount: number;
+    blurLength: number;
     modes: BackgroundMode[];
     meeting: Meeting | null = null;
     middleware: any;
@@ -44,6 +43,8 @@ export default class VideoBGAddon {
     buttonIcon?: string;
     segmentationConfig?: Partial<SegmentationConfig>;
     postProcessingConfig?: Partial<PostProcessingConfig>;
+    transform: DyteVideoBackgroundTransformer | null = null;
+    initInProgress = false;
 
     constructor(args?: VideoBGAddonArgs) {
         this.images = args?.images ?? [];
@@ -52,6 +53,7 @@ export default class VideoBGAddon {
                 ? args.modes
                 : ["blur", "virtual", "random"];
         this.randomCount = args?.randomCount ?? 8;
+        this.blurLength = args?.blurLength ?? 50;
         this.buttonIcon = args.buttonIcon;
         if (args.selector) {
             this.selector = args.selector;
@@ -91,10 +93,10 @@ export default class VideoBGAddon {
     }
 
     async addVideoVirtualBackground() {
-        if (!this.meeting || !transform) return;
+        if (!this.meeting || !this.transform) return;
 
         this.middleware =
-            await transform.createStaticBackgroundVideoMiddleware(
+            await this.transform.createStaticBackgroundVideoMiddleware(
                 this.images[0]
             );
         await this.meeting.self.addVideoMiddleware(this.middleware);
@@ -162,7 +164,7 @@ export default class VideoBGAddon {
 
         // @ts-ignore
         changer.onChange = async (mode: BackgroundMode, image?: string, imageElement: HTMLImageElement) => {
-            if (!this.meeting || !transform) return;
+            if (!this.meeting || !this.transform) return;
             if(changer['isVideoBackgroundBeingApplied']){
                 return;
             }
@@ -173,12 +175,12 @@ export default class VideoBGAddon {
             await meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
             if (mode === "blur") {
                 this.middleware =
-                    await transform.createBackgroundBlurVideoMiddleware();
+                    await this.transform.createBackgroundBlurVideoMiddleware(this.blurLength);
                 await this.meeting.self.addVideoMiddleware(this.middleware);
             } else if (mode === "virtual" && image) {
                 const imageURL = this.getImageDataURLFromImage(imageElement);
                 this.middleware =
-                    await transform.createStaticBackgroundVideoMiddleware(
+                    await this.transform.createStaticBackgroundVideoMiddleware(
                         imageURL,
                     );
                 await this.meeting.self.addVideoMiddleware(this.middleware);
@@ -197,15 +199,15 @@ export default class VideoBGAddon {
         }
 
         // Initialize the transformer
-        if (!transform && !initInProgress) {
-            initInProgress = true;
+        if (!this.transform && !this.initInProgress) {
+            this.initInProgress = true;
             DyteVideoBackgroundTransformer.init({
                 // @ts-ignore
                 meeting,
                 segmentationConfig: this.segmentationConfig || {},
                 postProcessingConfig: this.postProcessingConfig || {},
             }).then((_transform) => {
-                transform = _transform;
+                this.transform = _transform;
             });
         }
 

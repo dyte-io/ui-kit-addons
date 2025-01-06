@@ -7,15 +7,15 @@
             content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"
         />
         <title>Dyte UI Kit Addons</title>
-        <script src="https://cdn.dyte.in/core/dyte-2.1.2.js"></script>
+        <script src="https://cdn.dyte.in/core/dyte-2.2.0.js"></script>
     </head>
     <body>
         <div id="root">
             <dyte-meeting id="meeting"></dyte-meeting>
         </div>
         <script type="module">
-            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.0.4/loader/index.es2017.js";
-            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.0.4/dist/esm/index.js";
+            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.1.3/loader/index.es2017.js";
+            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.1.3/dist/esm/index.js";
 
             // Import addons
             import DyteVideoBackground from "/src/video-background/index.ts";
@@ -24,13 +24,15 @@
             import ChatHostControl from "/src/chat-host-control/index.ts";
             import MicHostControl from "/src/mic-host-control/index.ts";
             import CameraHostControl from "/src/camera-host-control/index.ts";
+            import ParticipantTileMenu from "/src/participant-tile-menu/index.ts";
 
             defineCustomElements();
 
-            window.onload = async function () {
+            async function dyteSetupMeetingAndAddons(authToken) {
                 const meetingRef = document.getElementById("meeting");
                 const url = new URL(window.location.href);
-                const authToken = url.searchParams.get("authToken") || 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdJZCI6IjM5MGJmMjc0LTQxMzMtNDI2ZC04NDkxLWVhN2ExYTE5MDQ4YiIsIm1lZXRpbmdJZCI6ImJiYjVkNjM0LTczNjAtNGY4Yi1hNGNjLTRkNDMyOGM3ZDI0NiIsInBhcnRpY2lwYW50SWQiOiJhYWE0NzlhNi1kYmU5LTRhODgtYWY2NC05YzFhZDg1MWQzOGMiLCJwcmVzZXRJZCI6IjJhZWI3Y2RhLWYxNGUtNDVlMC05MDk3LTM1ZWI3ODhjYzZjMiIsImlhdCI6MTcyNTk1MDg2MywiZXhwIjoxNzM0NTkwODYzfQ.rt0uGXwjxBayLlPm5dfSiQ1xFU2WXJdWa682jHWe-W6oZFnZArdQhQUfUt5kswJRthLJmqVU6ptbqL9RIoFr8_c_ALWv_HzrUeb_4nD9nAtezQ0p7JpXQTma_XFNEr7hUGAn36WZfvnAGYURpxA03060hr1KN8wivIhDtdJykGYG6OBXfMqglRyw2VWiW6upOUIWN2SAiZf-IhaZBHUbjeRqwbiP-KMoiaYvLar8epOxJR_n_pujn-jvrrgQJD3UiGghmApsVDYjupOn1hUlrrdFSW-aW9vPpWPfjfBmXbeLIcR_CPRawcevPIa9C9BRMTKkM2vXJTfrm_lY1HNVeA';
+                authToken = authToken || url.searchParams.get("authToken");
+
                 if (!authToken) {
                     alert("Please provide an authToken in the URL");
                     return;
@@ -38,6 +40,7 @@
 
                 const videoBackground = new DyteVideoBackground({
                     modes: ["blur", "virtual"],
+                    blurLength: 50, // 0 - 100 for opacity
                     images: [
                         "https://images.unsplash.com/photo-1487088678257-3a541e6e3922?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3",
                         "https://images.unsplash.com/photo-1496715976403-7e36dc43f17b?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -53,10 +56,19 @@
                     position: "start"
                 });
 
+                const participantMenu = new ParticipantTileMenu([{
+                    label: "Custom Toggle",
+                    onClick: (participantId) => {
+                    console.log('Clicked on custom toggle for ', participantId);
+                    }
+                }], 'top-right');
+
                 const meeting = await DyteClient.init({ authToken, modules: {
                     devTools: {
                     logs: true
                 }}});
+                
+                window.meeting = meeting;
 
                 const handRaise = await HandRaise.init({
                     meeting,
@@ -88,12 +100,15 @@
                 });
 
                 const config = await registerAddons(
-                    [chatHostControl, micHostControl, cameraHostControl, videoBackground, tabAction, handRaise],
+                    [handRaise, chatHostControl, micHostControl, cameraHostControl, videoBackground, tabAction, participantMenu],
                     meeting
                 );
                 meetingRef.meeting = meeting;
                 meetingRef.config = config;
-                window.meeting = meeting;
+            };
+            window.dyteSetupMeetingAndAddons = dyteSetupMeetingAndAddons;
+            window.onload = () => {
+                dyteSetupMeetingAndAddons();
             };
         </script>
     </body>

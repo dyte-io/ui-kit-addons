@@ -35,19 +35,22 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This repository consists of all the different ways in which you can use Dyte's
-React UI Kit and other packages to its full extent to get the best live
-audio/video experience.
+This [repository](https://github.com/dyte-io/ui-kit-addons) contains all the ui-kit addons available for the Dyte Web SDK.
 
 ## Samples
 
 Here are the list of available samples at the moment.
 
-1. [Custom Controlbar button](./src/custom-controlbar-button/)
-2. [Video Background](./src/video-background/)
-3. [Hand Raise](./src/hand-raise/)
-4. [Participants Tab Action](./src/participants-tab-action/)
-
+1. [Camera Host Control](./src/camera-host-control/)
+2. [Chat Host Control](./src/chat-host-control/)
+3. [Custom Controlbar button](./src/custom-controlbar-button/)
+4. [Hand Raise](./src/hand-raise/)
+5. [Mic Host Control](./src/mic-host-control/)
+6. [Participant Menu Item](./src/participant-menu-item/)
+7. [Participant Tile Menu](./src/participant-tile-menu/)
+8. [Participants Tab Action](./src/participants-tab-action/)
+9. [Participant Tab Toggle](./src/participants-tab-toggle/)
+10. [Video Background](./src/video-background/)
 
 ## Usage
 

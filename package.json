@@ -113,7 +113,7 @@
   "author": "dyte Inc.",
   "license": "ISC",
   "dependencies": {
-    "@dytesdk/video-background-transformer": "2.0.4"
+    "@dytesdk/video-background-transformer": "2.0.5"
   },
   "main": "index.js",
   "peerDependencies": {
