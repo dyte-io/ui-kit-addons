@@ -10,7 +10,7 @@ export interface VideoBGAddonArgs {
     images?: string[];
     modes?: BackgroundMode[];
     randomCount?: number;
-    blurLength?: number;
+    blurStrength?: number;
     selector?: string;
     buttonIcon?: string;
     segmentationConfig?: Partial<SegmentationConfig>;
@@ -29,13 +29,14 @@ const defaultIcon =
  * const addon = new VideoBGAddon({
  *   images: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
  *   modes: ['blur', 'virtual', 'random'],
- *   randomCount: 8
+ *   randomCount: 8,
+ *   blurStrength: 50, // 0 to 100
  * });
  */
 export default class VideoBGAddon {
     images: string[];
     randomCount: number;
-    blurLength: number;
+    blurStrength: number;
     modes: BackgroundMode[];
     meeting: Meeting | null = null;
     middleware: any;
@@ -53,7 +54,7 @@ export default class VideoBGAddon {
                 ? args.modes
                 : ["blur", "virtual", "random"];
         this.randomCount = args?.randomCount ?? 8;
-        this.blurLength = args?.blurLength ?? 50;
+        this.blurStrength = args?.blurStrength ?? 50;
         this.buttonIcon = args.buttonIcon;
         if (args.selector) {
             this.selector = args.selector;
@@ -175,7 +176,7 @@ export default class VideoBGAddon {
             await meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
             if (mode === "blur") {
                 this.middleware =
-                    await this.transform.createBackgroundBlurVideoMiddleware(this.blurLength);
+                    await this.transform.createBackgroundBlurVideoMiddleware(this.blurStrength);
                 await this.meeting.self.addVideoMiddleware(this.middleware);
             } else if (mode === "virtual" && image) {
                 const imageURL = this.getImageDataURLFromImage(imageElement);
