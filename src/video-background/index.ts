@@ -10,6 +10,7 @@ export interface VideoBGAddonArgs {
     images?: string[];
     modes?: BackgroundMode[];
     randomCount?: number;
+    /** Blur strength can be any value from 0 to 100 */
     blurStrength?: number;
     selector?: string;
     buttonIcon?: string;
