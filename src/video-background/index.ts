@@ -41,7 +41,7 @@ export default class VideoBGAddon {
     modes: BackgroundMode[];
     meeting: Meeting | null = null;
     middleware: any;
-    label?: string = 'Effects';
+    buttonLabel?: string = 'Effects';
     selector?: string;
     buttonIcon?: string;
     segmentationConfig?: Partial<SegmentationConfig>;
@@ -118,7 +118,7 @@ export default class VideoBGAddon {
     addControlBarButton(selector: any, attributes: { [key: string]: any }) {
         selector.add("dyte-controlbar-button", {
             id: "effects",
-            label: this.label,
+            label: this.buttonLabel,
             icon: this.buttonIcon ?? defaultIcon,
             // @ts-ignore
             onClick: () => {
