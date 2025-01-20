@@ -13,6 +13,7 @@ export interface VideoBGAddonArgs {
     /** Blur strength can be any value from 0 to 100 */
     blurStrength?: number;
     selector?: string;
+    buttonLabel?: string;
     buttonIcon?: string;
     segmentationConfig?: Partial<SegmentationConfig>;
     postProcessingConfig?: Partial<PostProcessingConfig>;
@@ -58,6 +59,7 @@ export default class VideoBGAddon {
         this.randomCount = args?.randomCount ?? 8;
         this.blurStrength = args?.blurStrength ?? 50;
         this.buttonIcon = args.buttonIcon;
+        this.buttonLabel = args?.buttonLabel ?? 'Effects';
         if (args.selector) {
             this.selector = args.selector;
         }
