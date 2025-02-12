@@ -54,7 +54,7 @@ export default class VideoBGAddon {
     currentBackgroundURL:  string | null = null;
     videoBackgroundChanger: BackgroundChanger | null = null;
 
-    constructor(args?: VideoBGAddonArgs) {
+    private constructor(args?: VideoBGAddonArgs) {
         this.images = args?.images ?? [];
         this.meeting = args?.meeting;
         this.modes =
