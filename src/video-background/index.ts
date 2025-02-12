@@ -116,10 +116,10 @@ export default class VideoBGAddon {
             }
             changer['isVideoBackgroundBeingApplied'] =  true;
             if (mode === "blur") {
-                await videoBGAddon.addVideoBlurBackground();
+                await videoBGAddon.applyBlurBackground();
             } else if (mode === "virtual" && imageURL) {
                 const imageAsDataURL = videoBGAddon.getImageDataURLFromImage(imageElement);
-                await videoBGAddon.addVideoVirtualBackground(imageURL, imageAsDataURL);
+                await videoBGAddon.applyVirtualBackground(imageURL, imageAsDataURL);
             } else if (mode === "none") {
                 await videoBGAddon.removeCurrentMiddleware({skipHighlightingTransientRemoval: false});
             }
@@ -141,7 +141,7 @@ export default class VideoBGAddon {
         return videoBGAddon;
     }
 
-    getImageDataURLFromImage(img: HTMLImageElement) {
+    private getImageDataURLFromImage(img: HTMLImageElement) {
         const canvas = document.createElement("canvas");
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
@@ -150,7 +150,7 @@ export default class VideoBGAddon {
         return canvas.toDataURL();
     }
 
-    async getRandomImages(count: number) {
+    private async getRandomImages(count: number) {
         let images = [
             'https://assets.dyte.io/backgrounds/bg_1.jpg',
             'https://assets.dyte.io/backgrounds/bg_2.jpg',
@@ -179,7 +179,7 @@ export default class VideoBGAddon {
         });
     }
 
-    async addVideoVirtualBackground(imageURL: string, imageAsDataURL?: string) {
+    public async applyVirtualBackground(imageURL: string, imageAsDataURL?: string) {
         if (!DyteVideoBackgroundTransformer.isSupported()) return;
 
         if (this.middleware) {
@@ -212,7 +212,7 @@ export default class VideoBGAddon {
         this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
     }
 
-    async addVideoBlurBackground() {
+    public async applyBlurBackground() {
         if (!DyteVideoBackgroundTransformer.isSupported()) return;
 
         if (this.middleware) {
@@ -226,7 +226,7 @@ export default class VideoBGAddon {
         this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
     }
 
-    async removeCurrentMiddleware({skipHighlightingTransientRemoval = false}: {skipHighlightingTransientRemoval: boolean}) {
+    private async removeCurrentMiddleware({skipHighlightingTransientRemoval = false}: {skipHighlightingTransientRemoval: boolean}) {
         /**
          * NOTE(ravindra-dyte):
          * 
@@ -250,27 +250,17 @@ export default class VideoBGAddon {
         }
     }
 
-    async removeVideoVirtualBackground() {
-        if(this.currentBackgroundMode === 'virtual'){
+    public async removeBackground() {
             await this.removeCurrentMiddleware({
                 skipHighlightingTransientRemoval: false,
             });
-        }
     }
 
-    async removeVideoBlurBackground() {
-        if(this.currentBackgroundMode === 'blur'){
-            await this.removeCurrentMiddleware({
-                skipHighlightingTransientRemoval: false
-            });
-        }
+    public async unregister() {
+        await this.removeBackground();
     }
 
-    async unregister() {
-        await this.removeVideoVirtualBackground();
-    }
-
-    addControlBarButton(selector: any, attributes: { [key: string]: any }) {
+    private addControlBarButton(selector: any, attributes: { [key: string]: any }) {
         selector.add("dyte-controlbar-button", {
             id: "effects",
             label: this.buttonLabel,
@@ -293,7 +283,7 @@ export default class VideoBGAddon {
         });
     }
 
-    register(config: UIConfig, _meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
+    public register(config: UIConfig, _meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
         if (!DyteVideoBackgroundTransformer.isSupported()) return config;
 
         // Add buttons with config

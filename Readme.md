@@ -153,6 +153,16 @@ Starting v4.0.0, Video Background Addon also has been migrated to the same struc
   });
 ```
 
+you can now apply, replace, or remove a background programmatically.
+
+```tsx
+videoBackground.applyVirtualBackground('https://images.unsplash.com/photo-1600431521340-491eca880813?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3')
+videoBackground.applyBlurBackground();
+
+// Common for virtual and blur backgrounds.
+videoBackground.removeBackground();
+```
+
 ## About
 
 This project is created & maintained by dyte, Inc. You can find us on Twitter - [@dyte_io](https://twitter.com/dyte_io) or write to us at `dev@dyte.io`.
