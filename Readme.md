@@ -37,6 +37,8 @@
 
 This [repository](https://github.com/dyte-io/ui-kit-addons) contains all the ui-kit addons available for the Dyte Web SDK.
 
+A comprehensive guide detailing the usage of these ui-kit addons is available [here](https://dyte.io/blog/ui-kit-add-ons/).
+
 ## Samples
 
 Here are the list of available samples at the moment.
@@ -133,6 +135,22 @@ const cameraHostControl = await CameraHostControl.init({
     targetPresets: ['webinar_viewer'],
     addActionInParticipantMenu: true,
 });
+```
+
+Starting v4.0.0, Video Background Addon also has been migrated to the same structure to make it easier to handle state internally.
+
+```tsx
+  const videoBackground = await DyteVideoBackground.init({
+      modes: ["blur", "virtual", "random"],
+      blurStrength: 30, // 0 - 100 for opacity
+      meeting,
+      images: [
+          "https://images.unsplash.com/photo-1487088678257-3a541e6e3922?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3",
+          "https://images.unsplash.com/photo-1496715976403-7e36dc43f17b?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3",
+          "https://images.unsplash.com/photo-1600431521340-491eca880813?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3"
+      ],
+      randomCount: 10,
+  });
 ```
 
 ## About

@@ -227,7 +227,21 @@ export default class VideoBGAddon {
     }
 
     async removeCurrentMiddleware({skipHighlightingTransientRemoval = false}: {skipHighlightingTransientRemoval: boolean}) {
-        await this.meeting.self.removeVideoMiddleware(this.middleware);
+        /**
+         * NOTE(ravindra-dyte):
+         * 
+         * Even though we should only be removing the current middleware,
+         * for a breakout room, if meeting has changed and for the middleware was carry forwarded,
+         * It could be that the middleware is part of meeting.self but not the ui-kit-addons instance.
+         * 
+         * Since most clients, when they use middlewares with disablePerFrameCanvasRendering as true, they use just this middleware alone,
+         * and for their custom needs, use meeting.self.videoTrack,
+         * therefore going with an assumption that removing all video middlewares won't impact anything.
+         * 
+         * In future releases, this assumption will be removed.
+         */
+        // await this.meeting.self.removeVideoMiddleware(this.middleware);
+        await this.meeting.self.removeAllVideoMiddlewares();
         this.middleware = null;
         this.currentBackgroundMode = 'none';
         this.currentBackgroundURL = null;
