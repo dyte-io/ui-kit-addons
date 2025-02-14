@@ -218,9 +218,8 @@ export default class VideoBGAddon {
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
 
-        if (this.middleware) {
-            await this.removeCurrentMiddleware();
-        }
+        await this.removeCurrentMiddleware();
+
         /**
          * Internally we are passing images as dataURL to not refetch the image in case data cache is disabled,
          * which could be the case with Dev tools being opened. So, we are checking if the imageURL is not a dataURL
@@ -270,9 +269,8 @@ export default class VideoBGAddon {
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
 
-        if (this.middleware) {
-            await this.removeCurrentMiddleware();
-        }
+        await this.removeCurrentMiddleware();
+        
         this.middleware =
             await this.transform.createBackgroundBlurVideoMiddleware(this.blurStrength);
         await this.meeting.self.addVideoMiddleware(this.middleware);

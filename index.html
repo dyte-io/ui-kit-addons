@@ -7,15 +7,15 @@
             content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"
         />
         <title>Dyte UI Kit Addons</title>
-        <script src="https://cdn.dyte.in/core/dyte-2.3.0.js"></script>
+        <script src="https://cdn.dyte.in/core/dyte-2.4.0.js"></script>
     </head>
     <body>
         <div id="root">
             <dyte-meeting id="meeting"></dyte-meeting>
         </div>
         <script type="module">
-            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.2.0/loader/index.es2017.js";
-            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.2.0/dist/esm/index.js";
+            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.2.2/loader/index.es2017.js";
+            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.2.2/dist/esm/index.js";
 
             // Import addons
             import DyteVideoBackground from "/src/video-background/index.ts";
@@ -28,20 +28,8 @@
 
             defineCustomElements();
 
-            async function dyteSetupMeetingAndAddons(authToken) {
+            async function registerUIKitAddons(meeting){
                 const meetingRef = document.getElementById("meeting");
-                const url = new URL(window.location.href);
-                authToken = authToken || url.searchParams.get("authToken");
-
-                if (!authToken) {
-                    alert("Please provide an authToken in the URL");
-                    return;
-                }
-
-                // clean up existing meeting if any
-                if (meetingRef.meeting) {
-                    await meetingRef.meeting.leave();
-                }
                 const tabAction = new ParticipantsTabAction({
                     onClick: () => {
                         alert("Clicked!");
@@ -56,13 +44,6 @@
                     console.log('Clicked on custom toggle for ', participantId);
                     }
                 }], 'top-right');
-
-                const meeting = await DyteClient.init({ authToken, modules: {
-                    devTools: {
-                    logs: true
-                }}});
-                
-                window.meeting = meeting;
 
                 const handRaise = await HandRaise.init({
                     meeting,
@@ -91,6 +72,8 @@
                     randomCount: 10,
                 });
 
+                window.videoBackground = videoBackground;
+
                 const micHostControl = await MicHostControl.init({
                     meeting,
                     hostPresets: ['webinar_presenter'],
@@ -111,6 +94,38 @@
                 );
                 meetingRef.meeting = meeting;
                 meetingRef.config = config;
+            }
+
+            async function dyteSetupMeetingAndAddons(authToken, cleanupExistingMeetingIfAny=true) {
+                const meetingRef = document.getElementById("meeting");
+                const url = new URL(window.location.href);
+                authToken = authToken || url.searchParams.get("authToken");
+
+                if (!authToken) {
+                    alert("Please provide an authToken in the URL");
+                    return;
+                }
+
+                // clean up existing meeting if any
+                if (cleanupExistingMeetingIfAny && meetingRef.meeting) {
+                    await meetingRef.meeting.leave();
+                }
+
+                const meeting = await DyteClient.init({ authToken, modules: {
+                    devTools: {
+                    logs: true
+                }}});
+                
+                window.meeting = meeting;
+
+                // Breakout rooms logic
+                meeting.connectedMeetings.on('meetingChanged', async (newMeeting) => {
+                    window.meeting = meeting;
+                    registerUIKitAddons(newMeeting);
+                });
+
+                registerUIKitAddons(meeting);
+                
             };
             window.dyteSetupMeetingAndAddons = dyteSetupMeetingAndAddons;
             window.onload = () => {
