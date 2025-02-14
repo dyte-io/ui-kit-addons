@@ -125,6 +125,10 @@ img {
   border: 2px solid rgb(var(--dyte-colors-background-800, 26 26 26));
 }
 
+.highlighted {
+    border: 2px solid rgb(var(--dyte-colors-brand-500, 26 26 26));
+}
+
 .image-container:hover {
     border: 2px solid rgb(var(--dyte-colors-brand-500, 26 26 26));
 }
@@ -163,6 +167,9 @@ img {
 .js-image-loading{
     cursor: wait !important;
 }
+.js-image-failed-to-load{
+    cursor: not-allowed !important;
+}
 
 @container backgroundchanger (max-width: 300px) {
   #dialog {
@@ -183,7 +190,7 @@ export class BackgroundChanger extends HTMLElement {
     _images = [];
     _randomImages = [];
     _modes = ["blur", "virtual"];
-    _isVideoBackgroundBeingApplied = false;
+    _isVideoBackgroundUpdateOngoing = false;
     _onchange: (mode: BackgroundMode, image?: string, imageElement?: HTMLImageElement) => void = () => {};
 
     constructor() {
@@ -210,22 +217,22 @@ export class BackgroundChanger extends HTMLElement {
         return this._modes;
     }
 
-    set isVideoBackgroundBeingApplied(isBeingApplied: boolean){
-        this._isVideoBackgroundBeingApplied = isBeingApplied;
-        this.shadow.querySelectorAll('.js-image-row')?.forEach((imageRow: HTMLImageElement) => {
+    set isVideoBackgroundUpdateOngoing(isBeingApplied: boolean){
+        this._isVideoBackgroundUpdateOngoing = isBeingApplied;
+        this.shadow.querySelectorAll('.js-middleware-action-element')?.forEach((middlewareActionElement: HTMLElement) => {
             if(isBeingApplied){
-                imageRow.classList.add('video-background-update-ongoing');
+                middlewareActionElement.classList.add('video-background-update-ongoing');
             } else {
-                imageRow.classList.remove('video-background-update-ongoing');
+                middlewareActionElement.classList.remove('video-background-update-ongoing');
             }
         });
     }
 
-    get isVideoBackgroundBeingApplied() {
-        return this._isVideoBackgroundBeingApplied;
+    get isVideoBackgroundUpdateOngoing() {
+        return this._isVideoBackgroundUpdateOngoing;
     }
 
-    set onChange(change: () => void) {
+    set onChange(change: (mode: BackgroundMode, imageURL?: string, imageElement?: HTMLImageElement) => void) {
         this._onchange = change;
         this.updatedProps();
     }
@@ -287,19 +294,24 @@ export class BackgroundChanger extends HTMLElement {
         if (!this._images || this._images.length === 0) return imageRows;
         this._images.map((image, i) => {
             const row = document.createElement("img");
-            row.setAttribute("class", "container image-container js-image-row js-image-loading");
+            row.setAttribute("class", "container image-container js-middleware-action-element js-image-middleware js-image-loading");
             row.setAttribute("key", i.toString());
             row.setAttribute("crossOrigin", 'anonymous');
             row.setAttribute("src", image);
             row.addEventListener("click", () => {
-                if(row.complete){
+                if(row.complete && row.naturalHeight){ // image is fully loaded
                     this._onchange("virtual", image, row);
                 }
             });
             row.onload = () => {
                 row.classList.remove('js-image-loading');
             }
-            if(this.isVideoBackgroundBeingApplied){
+            row.onerror = () => {
+                row.classList.remove('js-image-loading');
+                row.classList.add('js-image-failed-to-load');
+            }
+            
+            if(this.isVideoBackgroundUpdateOngoing){
                 row.classList.add('video-background-update-ongoing');
             }
             imageRows.push(row);
@@ -310,15 +322,19 @@ export class BackgroundChanger extends HTMLElement {
     createContainer(type: BackgroundMode = "none") {
         const container = this.createElement("div", "container", "");
         const box = document.createElement("div");
-        if(this.isVideoBackgroundBeingApplied){
+        if(this.isVideoBackgroundUpdateOngoing){
             container.classList.add('video-background-update-ongoing');
         }
         if (type === "blur") {
+            container.classList.add("js-middleware-action-element");
+            container.classList.add("js-blur-middleware");
             box.innerHTML = BLUR_ICON;
             box.addEventListener("click", () => {
                 this._onchange("blur");
             });
         } else {
+            container.classList.add("js-middleware-action-element");
+            container.classList.add("js-no-middleware");
             box.innerHTML = NONE_ICON;
             box.addEventListener("click", () => {
                 this._onchange("none");
@@ -375,11 +391,38 @@ export class BackgroundChanger extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["images", "modes", "isVideoBackgroundBeingApplied"];
+        return ["images", "modes", "isVideoBackgroundUpdateOngoing"];
     }
 
     attributeChangedCallback() {
         this.create();
+    }
+
+    highlightSelectedMiddleware(currentBackgroundMode: BackgroundMode, currentBackgroundURL: string) {
+        if(currentBackgroundMode === 'blur'){
+            this.shadow.querySelectorAll('.js-middleware-action-element').forEach((element: HTMLElement) => {
+                element.classList.remove('highlighted');
+            });
+            this.shadow.querySelectorAll('.js-blur-middleware').forEach((element: HTMLElement) => {
+                element.classList.add('highlighted');
+            });
+        } else if(currentBackgroundMode === 'virtual'){
+            this.shadow.querySelectorAll('.js-middleware-action-element').forEach((element: HTMLElement) => {
+                element.classList.remove('highlighted');
+            });
+            this.shadow.querySelectorAll('.js-image-middleware').forEach((element: HTMLElement) => {
+                if(element.getAttribute('src') === currentBackgroundURL){
+                    element.classList.add('highlighted');
+                }
+            });
+        } else if(currentBackgroundMode === 'none'){
+            this.shadow.querySelectorAll('.js-middleware-action-element').forEach((element: HTMLElement) => {
+                element.classList.remove('highlighted');
+            });
+            this.shadow.querySelectorAll('.js-no-middleware').forEach((element: HTMLElement) => {
+                element.classList.add('highlighted');
+            });
+        }
     }
 
     connectedCallback() {

@@ -8,7 +8,9 @@ import { SegmentationConfig } from "@dytesdk/video-background-transformer/types/
 
 export interface VideoBGAddonArgs {
     images?: string[];
+    meeting: Meeting;
     modes?: BackgroundMode[];
+    /** Currently only upto 7 random backgrounds will be shown */
     randomCount?: number;
     /** Blur strength can be any value from 0 to 100 */
     blurStrength?: number;
@@ -36,7 +38,7 @@ const defaultIcon =
  * });
  */
 export default class VideoBGAddon {
-    images: string[];
+    images: string[] = [];
     randomCount: number;
     blurStrength: number;
     modes: BackgroundMode[];
@@ -48,10 +50,13 @@ export default class VideoBGAddon {
     segmentationConfig?: Partial<SegmentationConfig>;
     postProcessingConfig?: Partial<PostProcessingConfig>;
     transform: DyteVideoBackgroundTransformer | null = null;
-    initInProgress = false;
+    currentBackgroundMode: 'blur' | 'virtual' | 'none' = 'none';
+    currentBackgroundURL:  string | null = null;
+    videoBackgroundChanger: BackgroundChanger | null = null;
 
-    constructor(args?: VideoBGAddonArgs) {
+    private constructor(args?: VideoBGAddonArgs) {
         this.images = args?.images ?? [];
+        this.meeting = args?.meeting;
         this.modes =
             args?.modes !== undefined && args?.modes.length > 0
                 ? args.modes
@@ -69,18 +74,78 @@ export default class VideoBGAddon {
         customElements.define("dyte-background-changer", BackgroundChanger);
     }
 
-    async getRandomImage() {
-        return fetch(
-            "https://source.unsplash.com/random/900?virtual-background",
-            {
-                redirect: "follow"
-            }
-        ).then((res) => {
-            return res.url;
+    static async init(args?: VideoBGAddonArgs) {
+        // this is a static method, value of `this` would be undefined or window but never the class instance
+        const videoBGAddon = new VideoBGAddon(args);
+        
+        if (videoBGAddon.modes.includes("random")) {
+            const randomImages = await videoBGAddon.getRandomImages(videoBGAddon.randomCount);
+            videoBGAddon.images.push(...randomImages);
+        }
+
+        await videoBGAddon.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
+        
+        videoBGAddon.transform = await DyteVideoBackgroundTransformer.init({
+            // @ts-ignore
+            meeting,
+            segmentationConfig: videoBGAddon.segmentationConfig || {},
+            postProcessingConfig: videoBGAddon.postProcessingConfig || {},
         });
+
+        const elements = document.getElementsByTagName("dyte-background-changer")
+        
+        if (elements[0]) {
+            // remove dyte-background-changer
+            elements[0].remove();
+        }
+
+        const changer = document.createElement("dyte-background-changer") as BackgroundChanger;
+
+        videoBGAddon.videoBackgroundChanger = changer;
+
+        changer.images = videoBGAddon.images;
+
+        changer.modes = videoBGAddon.modes;
+
+        changer['isVideoBackgroundUpdateOngoing'] = false;
+
+        changer.onChange = async (mode: BackgroundMode, imageURL?: string, imageElement?: HTMLImageElement) => {
+            if (!videoBGAddon.meeting || !videoBGAddon.transform) return;
+            
+            if (mode === "blur") {
+                await videoBGAddon.applyBlurBackground();
+            } else if (mode === "virtual" && imageURL && imageElement && imageElement.complete && imageElement.naturalHeight) {
+                /**
+                 * NOTE(ravindra-dyte): above check of faulty imageElement ensures that no action is taken if image is not fully loaded
+                 * It could fail to load if the devs missed adding CORS headers on their images,
+                 * on a website where CORS is needed for the image URI.
+                 * 
+                 * This also speeds up the adding middleware because we will use the data URL instead of image URL.
+                 * This is helpful if devs don't have cache headers and have Dev Tools open.
+                 *  */ 
+                const imageAsDataURL = videoBGAddon.getImageDataURLFromImage(imageElement);
+                await videoBGAddon.applyVirtualBackground(imageURL, imageAsDataURL);
+            } else if (mode === "none") {
+                await videoBGAddon.removeBackground();
+            }
+        };
+
+        if (videoBGAddon.selector) {
+            const el = document.querySelector(videoBGAddon.selector)
+            if (el) {
+                el.appendChild(changer);
+            }
+        } else {
+            // Add the changer to the body
+            document.body.appendChild(changer);
+        }
+
+        videoBGAddon.videoBackgroundChanger.highlightSelectedMiddleware(videoBGAddon.currentBackgroundMode, videoBGAddon.currentBackgroundURL);
+
+        return videoBGAddon;
     }
 
-    getImageDataURLFromImage(img: HTMLImageElement) {
+    private getImageDataURLFromImage(img: HTMLImageElement) {
         const canvas = document.createElement("canvas");
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
@@ -89,35 +154,184 @@ export default class VideoBGAddon {
         return canvas.toDataURL();
     }
 
-    async getRandomImages(count: number) {
-        const images = [];
-        for await (const _ of Array(count < 10 ? count : 10)) {
-            images.push(await this.getRandomImage());
-        }
+    private async getRandomImages(count: number) {
+        let images = [
+            'https://assets.dyte.io/backgrounds/bg_1.jpg',
+            'https://assets.dyte.io/backgrounds/bg_2.jpg',
+            'https://assets.dyte.io/backgrounds/bg_3.jpg',
+            'https://assets.dyte.io/backgrounds/bg_4.jpg',
+            'https://assets.dyte.io/backgrounds/bg_5.jpg',
+            'https://assets.dyte.io/backgrounds/bg_6.jpg',
+            'https://assets.dyte.io/backgrounds/bg_7.jpg',
+        ];
+
+        let randomCount = Math.min(images.length, count); // Currently only 7 backgrounds are hosted
+
+        images.sort(() => Math.random() > 0.5 ? -1 : 1);
+        
+        images = images.slice(0, randomCount);
         return images;
     }
 
-    async addVideoVirtualBackground() {
-        if (!this.meeting || !this.transform) return;
+    private async imageURLToDataUrl(url: string): Promise<string> {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result.toString());
+          reader.readAsDataURL(blob);
+        });
+    }
+
+    public async applyVirtualBackground(imageURL: string, imageAsDataURL?: string): Promise<{ isSuccessful: boolean; code: string; error?: string }> {
+        if (!DyteVideoBackgroundTransformer.isSupported()){
+            return {
+                isSuccessful: false,
+                code: 'UNSUPPORTED_BROWSER',
+                error: 'UI Kit Addon is not supported in this browser or browser version',
+            };
+        };
+
+        if(this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing']){
+            return {
+                isSuccessful: false,
+                code: 'VIDEO_BACKGROUND_UPDATE_ONGOING',
+                error: 'A video background update is already ongoing'
+            };
+        }
+
+        /**
+         * If CORS issue is there in the image, or image didn't load, fail fast
+         * 
+         * */
+        try{
+            if(!imageAsDataURL){
+                imageAsDataURL = await this.imageURLToDataUrl(imageURL);
+            }
+        }catch(ex){
+            return {
+                isSuccessful: false,
+                code: 'FAILED_TO_LOAD_IMAGE',
+                error: 'Please ensure that the imageURL is correct and is not having any CORS issues',
+            };
+        }
+
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+
+        await this.removeCurrentMiddleware();
+
+        /**
+         * Internally we are passing images as dataURL to not refetch the image in case data cache is disabled,
+         * which could be the case with Dev tools being opened. So, we are checking if the imageURL is not a dataURL
+         */
+        if(imageURL && !this.images.includes(imageURL)){
+            this.images.unshift(imageURL);
+        }
+
+        if(!imageURL){
+            imageURL = this.images[0];
+        }
 
         this.middleware =
             await this.transform.createStaticBackgroundVideoMiddleware(
-                this.images[0]
+                imageAsDataURL,
             );
         await this.meeting.self.addVideoMiddleware(this.middleware);
+        this.currentBackgroundMode = 'virtual';
+        this.currentBackgroundURL = imageURL;
+
+        this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
+        
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+        
+        return {
+            isSuccessful: true,
+            code: 'SUCCESSFUL',
+        };
     }
 
-    async removeVideoVirtualBackground() {
-        if (!this.meeting) return;
-        await this.meeting.self.removeVideoMiddleware(this.middleware);
-        this.middleware = undefined;
+    public async applyBlurBackground(): Promise<{ isSuccessful: boolean; code: string; error?: string }> {
+        if (!DyteVideoBackgroundTransformer.isSupported()){
+            return {
+                isSuccessful: false,
+                code: 'UNSUPPORTED_BROWSER',
+                error: 'UI Kit Addon is not supported in this browser or browser version',
+            };
+        };
+
+        if(this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing']){
+            return {
+                isSuccessful: false,
+                code: 'VIDEO_BACKGROUND_UPDATE_ONGOING',
+                error: 'A video background update is already ongoing'
+            };
+        }
+
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+
+        await this.removeCurrentMiddleware();
+        
+        this.middleware =
+            await this.transform.createBackgroundBlurVideoMiddleware(this.blurStrength);
+        await this.meeting.self.addVideoMiddleware(this.middleware);
+        this.currentBackgroundMode = 'blur';
+        this.currentBackgroundURL = null;
+
+        this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+
+        return {
+            isSuccessful: true,
+            code: 'SUCCESSFUL',
+        };
     }
 
-    async unregister() {
-        await this.removeVideoVirtualBackground();
+    private async removeCurrentMiddleware() {
+        /**
+         * NOTE(ravindra-dyte):
+         * 
+         * Even though we should only be removing the current middleware,
+         * for a breakout room, if meeting has changed and for the middleware was carry forwarded,
+         * It could be that the middleware is part of meeting.self but not the ui-kit-addons instance.
+         * 
+         * Since most clients, when they use middlewares with disablePerFrameCanvasRendering as true, they use just this middleware alone,
+         * and for their custom needs, use meeting.self.videoTrack,
+         * therefore going with an assumption that removing all video middlewares won't impact anything.
+         * 
+         * In future releases, this assumption will be removed.
+         */
+        // await this.meeting.self.removeVideoMiddleware(this.middleware);
+        await this.meeting.self.removeAllVideoMiddlewares();
+        this.middleware = null;
+        this.currentBackgroundMode = 'none';
+        this.currentBackgroundURL = null;
     }
 
-    addControlBarButton(selector: any, attributes: { [key: string]: any }) {
+    public async removeBackground() {
+        if(this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing']){    
+            return {
+                isSuccessful: false,
+                code: 'VIDEO_BACKGROUND_UPDATE_ONGOING',
+                error: 'A video background update is already ongoing'
+            };
+        }
+
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.removeCurrentMiddleware();
+        this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+
+        return {
+            isSuccessful: true,
+            code: 'SUCCESSFUL',
+        };
+    }
+
+    public async unregister() {
+        await this.removeBackground();
+    }
+
+    private addControlBarButton(selector: any, attributes: { [key: string]: any }) {
         selector.add("dyte-controlbar-button", {
             id: "effects",
             label: this.buttonLabel,
@@ -140,81 +354,8 @@ export default class VideoBGAddon {
         });
     }
 
-    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
+    public register(config: UIConfig, _meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
         if (!DyteVideoBackgroundTransformer.isSupported()) return config;
-
-        this.meeting = meeting;
-
-        const elements = document.getElementsByTagName("dyte-background-changer")
-        if (elements[0]) {
-            // remove dyte-background-changer
-            elements[0].remove();
-        }
-
-        const changer = document.createElement("dyte-background-changer");
-        // @ts-ignore
-        changer.images = this.images;
-
-        if (this.modes.includes("random")) {
-            this.getRandomImages(this.randomCount).then((images) => {
-                // @ts-ignore
-                changer.images = [...this.images, ...images];
-            });
-        }
-
-        // @ts-ignore
-        changer.modes = this.modes;
-
-        changer['isVideoBackgroundBeingApplied'] = false;
-
-        // @ts-ignore
-        changer.onChange = async (mode: BackgroundMode, image?: string, imageElement: HTMLImageElement) => {
-            if (!this.meeting || !this.transform) return;
-            if(changer['isVideoBackgroundBeingApplied']){
-                return;
-            }
-            changer['isVideoBackgroundBeingApplied'] =  true;
-            if (this.middleware) {
-                await this.removeVideoVirtualBackground();
-            }
-            await meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
-            if (mode === "blur") {
-                this.middleware =
-                    await this.transform.createBackgroundBlurVideoMiddleware(this.blurStrength);
-                await this.meeting.self.addVideoMiddleware(this.middleware);
-            } else if (mode === "virtual" && image) {
-                const imageURL = this.getImageDataURLFromImage(imageElement);
-                this.middleware =
-                    await this.transform.createStaticBackgroundVideoMiddleware(
-                        imageURL,
-                    );
-                await this.meeting.self.addVideoMiddleware(this.middleware);
-            }
-            changer['isVideoBackgroundBeingApplied'] =  false;
-        };
-
-        if (this.selector) {
-            const el = document.querySelector(this.selector)
-            if (el) {
-                el.appendChild(changer);
-            }
-        } else {
-            // Add the changer to the body
-            document.body.appendChild(changer);
-        }
-
-        // Initialize the transformer
-        if (!this.transform && !this.initInProgress) {
-            this.initInProgress = true;
-            DyteVideoBackgroundTransformer.init({
-                // @ts-ignore
-                meeting,
-                segmentationConfig: this.segmentationConfig || {},
-                postProcessingConfig: this.postProcessingConfig || {},
-            }).then((_transform) => {
-                this.transform = _transform;
-            });
-        }
 
         // Add buttons with config
         const builder = getBuilder(config);
