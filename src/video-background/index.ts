@@ -107,23 +107,27 @@ export default class VideoBGAddon {
 
         changer.modes = videoBGAddon.modes;
 
-        changer['isVideoBackgroundBeingApplied'] = false;
+        changer['isVideoBackgroundUpdateOngoing'] = false;
 
         changer.onChange = async (mode: BackgroundMode, imageURL?: string, imageElement?: HTMLImageElement) => {
             if (!videoBGAddon.meeting || !videoBGAddon.transform) return;
-            if(changer['isVideoBackgroundBeingApplied']){
-                return;
-            }
-            changer['isVideoBackgroundBeingApplied'] =  true;
+            
             if (mode === "blur") {
                 await videoBGAddon.applyBlurBackground();
-            } else if (mode === "virtual" && imageURL) {
+            } else if (mode === "virtual" && imageURL && imageElement && imageElement.complete && imageElement.naturalHeight) {
+                /**
+                 * NOTE(ravindra-dyte): above check of faulty imageElement ensures that no action is taken if image is not fully loaded
+                 * It could fail to load if the devs missed adding CORS headers on their images,
+                 * on a website where CORS is needed for the image URI.
+                 * 
+                 * This also speeds up the adding middleware because we will use the data URL instead of image URL.
+                 * This is helpful if devs don't have cache headers and have Dev Tools open.
+                 *  */ 
                 const imageAsDataURL = videoBGAddon.getImageDataURLFromImage(imageElement);
                 await videoBGAddon.applyVirtualBackground(imageURL, imageAsDataURL);
             } else if (mode === "none") {
-                await videoBGAddon.removeCurrentMiddleware({skipHighlightingTransientRemoval: false});
+                await videoBGAddon.removeBackground();
             }
-            changer['isVideoBackgroundBeingApplied'] =  false;
         };
 
         if (videoBGAddon.selector) {
@@ -179,11 +183,43 @@ export default class VideoBGAddon {
         });
     }
 
-    public async applyVirtualBackground(imageURL: string, imageAsDataURL?: string) {
-        if (!DyteVideoBackgroundTransformer.isSupported()) return;
+    public async applyVirtualBackground(imageURL: string, imageAsDataURL?: string): Promise<{ isSuccessful: boolean; code: string; error?: string }> {
+        if (!DyteVideoBackgroundTransformer.isSupported()){
+            return {
+                isSuccessful: false,
+                code: 'UNSUPPORTED_BROWSER',
+                error: 'UI Kit Addon is not supported in this browser or browser version',
+            };
+        };
+
+        if(this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing']){
+            return {
+                isSuccessful: false,
+                code: 'VIDEO_BACKGROUND_UPDATE_ONGOING',
+                error: 'A video background update is already ongoing'
+            };
+        }
+
+        /**
+         * If CORS issue is there in the image, or image didn't load, fail fast
+         * 
+         * */
+        try{
+            if(!imageAsDataURL){
+                imageAsDataURL = await this.imageURLToDataUrl(imageURL);
+            }
+        }catch(ex){
+            return {
+                isSuccessful: false,
+                code: 'FAILED_TO_LOAD_IMAGE',
+                error: 'Please ensure that the imageURL is correct and is not having any CORS issues',
+            };
+        }
+
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
 
         if (this.middleware) {
-            await this.removeCurrentMiddleware({skipHighlightingTransientRemoval: true});
+            await this.removeCurrentMiddleware();
         }
         /**
          * Internally we are passing images as dataURL to not refetch the image in case data cache is disabled,
@@ -197,10 +233,6 @@ export default class VideoBGAddon {
             imageURL = this.images[0];
         }
 
-        if(!imageAsDataURL){
-            imageAsDataURL = await this.imageURLToDataUrl(imageURL);
-        }
-
         this.middleware =
             await this.transform.createStaticBackgroundVideoMiddleware(
                 imageAsDataURL,
@@ -210,23 +242,53 @@ export default class VideoBGAddon {
         this.currentBackgroundURL = imageURL;
 
         this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
+        
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+        
+        return {
+            isSuccessful: true,
+            code: 'SUCCESSFUL',
+        };
     }
 
-    public async applyBlurBackground() {
-        if (!DyteVideoBackgroundTransformer.isSupported()) return;
+    public async applyBlurBackground(): Promise<{ isSuccessful: boolean; code: string; error?: string }> {
+        if (!DyteVideoBackgroundTransformer.isSupported()){
+            return {
+                isSuccessful: false,
+                code: 'UNSUPPORTED_BROWSER',
+                error: 'UI Kit Addon is not supported in this browser or browser version',
+            };
+        };
+
+        if(this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing']){
+            return {
+                isSuccessful: false,
+                code: 'VIDEO_BACKGROUND_UPDATE_ONGOING',
+                error: 'A video background update is already ongoing'
+            };
+        }
+
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
 
         if (this.middleware) {
-            await this.removeCurrentMiddleware({skipHighlightingTransientRemoval: true});
+            await this.removeCurrentMiddleware();
         }
         this.middleware =
             await this.transform.createBackgroundBlurVideoMiddleware(this.blurStrength);
         await this.meeting.self.addVideoMiddleware(this.middleware);
         this.currentBackgroundMode = 'blur';
         this.currentBackgroundURL = null;
+
         this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+
+        return {
+            isSuccessful: true,
+            code: 'SUCCESSFUL',
+        };
     }
 
-    private async removeCurrentMiddleware({skipHighlightingTransientRemoval = false}: {skipHighlightingTransientRemoval: boolean}) {
+    private async removeCurrentMiddleware() {
         /**
          * NOTE(ravindra-dyte):
          * 
@@ -245,15 +307,26 @@ export default class VideoBGAddon {
         this.middleware = null;
         this.currentBackgroundMode = 'none';
         this.currentBackgroundURL = null;
-        if(!skipHighlightingTransientRemoval){
-            this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
-        }
     }
 
     public async removeBackground() {
-            await this.removeCurrentMiddleware({
-                skipHighlightingTransientRemoval: false,
-            });
+        if(this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing']){    
+            return {
+                isSuccessful: false,
+                code: 'VIDEO_BACKGROUND_UPDATE_ONGOING',
+                error: 'A video background update is already ongoing'
+            };
+        }
+
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.removeCurrentMiddleware();
+        this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
+        this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+
+        return {
+            isSuccessful: true,
+            code: 'SUCCESSFUL',
+        };
     }
 
     public async unregister() {

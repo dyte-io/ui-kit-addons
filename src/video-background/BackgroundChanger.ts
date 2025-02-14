@@ -167,6 +167,9 @@ img {
 .js-image-loading{
     cursor: wait !important;
 }
+.js-image-failed-to-load{
+    cursor: not-allowed !important;
+}
 
 @container backgroundchanger (max-width: 300px) {
   #dialog {
@@ -187,7 +190,7 @@ export class BackgroundChanger extends HTMLElement {
     _images = [];
     _randomImages = [];
     _modes = ["blur", "virtual"];
-    _isVideoBackgroundBeingApplied = false;
+    _isVideoBackgroundUpdateOngoing = false;
     _onchange: (mode: BackgroundMode, image?: string, imageElement?: HTMLImageElement) => void = () => {};
 
     constructor() {
@@ -214,8 +217,8 @@ export class BackgroundChanger extends HTMLElement {
         return this._modes;
     }
 
-    set isVideoBackgroundBeingApplied(isBeingApplied: boolean){
-        this._isVideoBackgroundBeingApplied = isBeingApplied;
+    set isVideoBackgroundUpdateOngoing(isBeingApplied: boolean){
+        this._isVideoBackgroundUpdateOngoing = isBeingApplied;
         this.shadow.querySelectorAll('.js-middleware-action-element')?.forEach((middlewareActionElement: HTMLElement) => {
             if(isBeingApplied){
                 middlewareActionElement.classList.add('video-background-update-ongoing');
@@ -225,8 +228,8 @@ export class BackgroundChanger extends HTMLElement {
         });
     }
 
-    get isVideoBackgroundBeingApplied() {
-        return this._isVideoBackgroundBeingApplied;
+    get isVideoBackgroundUpdateOngoing() {
+        return this._isVideoBackgroundUpdateOngoing;
     }
 
     set onChange(change: (mode: BackgroundMode, imageURL?: string, imageElement?: HTMLImageElement) => void) {
@@ -296,14 +299,19 @@ export class BackgroundChanger extends HTMLElement {
             row.setAttribute("crossOrigin", 'anonymous');
             row.setAttribute("src", image);
             row.addEventListener("click", () => {
-                if(row.complete){
+                if(row.complete && row.naturalHeight){ // image is fully loaded
                     this._onchange("virtual", image, row);
                 }
             });
             row.onload = () => {
                 row.classList.remove('js-image-loading');
             }
-            if(this.isVideoBackgroundBeingApplied){
+            row.onerror = () => {
+                row.classList.remove('js-image-loading');
+                row.classList.add('js-image-failed-to-load');
+            }
+            
+            if(this.isVideoBackgroundUpdateOngoing){
                 row.classList.add('video-background-update-ongoing');
             }
             imageRows.push(row);
@@ -314,7 +322,7 @@ export class BackgroundChanger extends HTMLElement {
     createContainer(type: BackgroundMode = "none") {
         const container = this.createElement("div", "container", "");
         const box = document.createElement("div");
-        if(this.isVideoBackgroundBeingApplied){
+        if(this.isVideoBackgroundUpdateOngoing){
             container.classList.add('video-background-update-ongoing');
         }
         if (type === "blur") {
@@ -383,7 +391,7 @@ export class BackgroundChanger extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["images", "modes", "isVideoBackgroundBeingApplied"];
+        return ["images", "modes", "isVideoBackgroundUpdateOngoing"];
     }
 
     attributeChangedCallback() {
