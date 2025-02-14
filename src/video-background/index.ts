@@ -87,7 +87,7 @@ export default class VideoBGAddon {
         
         videoBGAddon.transform = await DyteVideoBackgroundTransformer.init({
             // @ts-ignore
-            meeting,
+            meeting: videoBGAddon.meeting,
             segmentationConfig: videoBGAddon.segmentationConfig || {},
             postProcessingConfig: videoBGAddon.postProcessingConfig || {},
         });

@@ -116,11 +116,11 @@
                     logs: true
                 }}});
                 
-                window.meeting = meeting;
+                // window.meeting = meeting;
 
                 // Breakout rooms logic
                 meeting.connectedMeetings.on('meetingChanged', async (newMeeting) => {
-                    window.meeting = meeting;
+                    // window.meeting = meeting;
                     registerUIKitAddons(newMeeting);
                 });
 
