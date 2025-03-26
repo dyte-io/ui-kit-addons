@@ -1,6 +1,6 @@
 {
   "name": "@dytesdk/ui-kit-addons",
-  "version": "4.0.2",
+  "version": "4.1.0",
   "description": "A collection of Dyte UI-kit addons",
   "type": "module",
   "exports": {
