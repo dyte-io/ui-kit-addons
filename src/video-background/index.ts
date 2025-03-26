@@ -74,6 +74,19 @@ export default class VideoBGAddon {
         customElements.define("dyte-background-changer", BackgroundChanger);
     }
 
+    private async initializeCoreVideoBackgroundTransformerIfNeeded(){
+        if(this.transform){
+            return;
+        }
+        await this.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
+        
+        this.transform = await DyteVideoBackgroundTransformer.init({
+            meeting: this.meeting,
+            segmentationConfig: this.segmentationConfig || {},
+            postProcessingConfig: this.postProcessingConfig || {},
+        });
+    }
+
     static async init(args?: VideoBGAddonArgs) {
         // this is a static method, value of `this` would be undefined or window but never the class instance
         const videoBGAddon = new VideoBGAddon(args);
@@ -83,14 +96,20 @@ export default class VideoBGAddon {
             videoBGAddon.images.push(...randomImages);
         }
 
-        await videoBGAddon.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
+        /**
+         * NOTE(ravindra-dyte):
+         *  To speed up the initialisation and meeting load,
+         *  below part is commented out and optionally initialized using `initializeCoreVideoBackgroundTransformerIfNeeded`.
+         *  `initializeCoreVideoBackgroundTransformerIfNeeded` method is called when first middleware is applied.
+         */
+        // await videoBGAddon.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
         
-        videoBGAddon.transform = await DyteVideoBackgroundTransformer.init({
-            // @ts-ignore
-            meeting: videoBGAddon.meeting,
-            segmentationConfig: videoBGAddon.segmentationConfig || {},
-            postProcessingConfig: videoBGAddon.postProcessingConfig || {},
-        });
+        // videoBGAddon.transform = await DyteVideoBackgroundTransformer.init({
+        //     // @ts-ignore
+        //     meeting: videoBGAddon.meeting,
+        //     segmentationConfig: videoBGAddon.segmentationConfig || {},
+        //     postProcessingConfig: videoBGAddon.postProcessingConfig || {},
+        // });
 
         const elements = document.getElementsByTagName("dyte-background-changer")
         
@@ -110,7 +129,7 @@ export default class VideoBGAddon {
         changer['isVideoBackgroundUpdateOngoing'] = false;
 
         changer.onChange = async (mode: BackgroundMode, imageURL?: string, imageElement?: HTMLImageElement) => {
-            if (!videoBGAddon.meeting || !videoBGAddon.transform) return;
+            if (!videoBGAddon.meeting) return;
             
             if (mode === "blur") {
                 await videoBGAddon.applyBlurBackground();
@@ -217,6 +236,7 @@ export default class VideoBGAddon {
         }
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.initializeCoreVideoBackgroundTransformerIfNeeded();
 
         await this.removeCurrentMiddleware();
 
@@ -268,6 +288,7 @@ export default class VideoBGAddon {
         }
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.initializeCoreVideoBackgroundTransformerIfNeeded();
 
         await this.removeCurrentMiddleware();
         
@@ -317,6 +338,8 @@ export default class VideoBGAddon {
         }
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.initializeCoreVideoBackgroundTransformerIfNeeded();
+        
         await this.removeCurrentMiddleware();
         this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
