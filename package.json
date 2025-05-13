@@ -1,7 +1,7 @@
 {
-  "name": "@dytesdk/ui-kit-addons",
-  "version": "4.0.1",
-  "description": "A collection of Dyte UI-kit addons",
+  "name": "@cloudflare/realtimekit-ui-addons",
+  "version": "0.0.2",
+  "description": "A collection of Cloudflare RealtimeKit UI addons",
   "type": "module",
   "exports": {
     "./custom-controlbar-button": {
@@ -103,6 +103,7 @@
     "dist/"
   ],
   "publishConfig": {
+    "access": "public",
     "tag": "latest"
   },
   "scripts": {
@@ -110,15 +111,15 @@
     "build": "vite build && npm run compile",
     "dev": "npm run build && vite"
   },
-  "author": "dyte Inc.",
-  "license": "ISC",
+  "author": "Cloudflare Inc.",
+  "license": "UNLICENSED",
   "dependencies": {
-    "@dytesdk/video-background-transformer": "2.0.6"
+    "@cloudflare/realtimekit-virtual-background": "0.0.2-staging.2"
   },
   "main": "index.js",
   "peerDependencies": {
-    "@dytesdk/ui-kit": ">=2.2.0",
-    "@dytesdk/web-core": ">=2.3.0"
+    "@cloudflare/realtimekit-ui": "1.0.0-staging.14",
+    "@cloudflare/realtimekit": "0.5.0-staging.112"
   },
   "devDependencies": {
     "typescript": "^5.2.2",
@@ -126,10 +127,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dyte-in/ui-kit-addons.git"
+    "url": "git+https://github.com/rtk-io/ui-kit-addons.git"
   },
   "bugs": {
-    "url": "https://github.com/dyte-in/ui-kit-addons/issues"
+    "url": "https://github.com/rtk-io/ui-kit-addons/issues"
   },
-  "homepage": "https://github.com/dyte-in/ui-kit-addons#readme"
+  "homepage": "https://github.com/rtk-io/ui-kit-addons#readme"
 }

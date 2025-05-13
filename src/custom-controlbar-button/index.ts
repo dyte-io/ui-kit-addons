@@ -1,5 +1,5 @@
-import { DyteUIBuilder, UIConfig } from '@dytesdk/ui-kit';
-import { Meeting } from '@dytesdk/ui-kit/dist/types/types/dyte-client';
+import { RtkUiBuilder, UIConfig } from '@cloudflare/realtimekit-ui';
+import { Meeting } from '@cloudflare/realtimekit-ui/dist/types/types/rtk-client';
 
 export interface CustomControlbarButtonArgs {
 	position: 'left' | 'right' | 'center' | 'more-menu';
@@ -10,7 +10,7 @@ export interface CustomControlbarButtonArgs {
 }
 
 
-// hack for now to get a reference to dyte-controlbar-button
+// hack for now to get a reference to rtk-controlbar-button
 const querySelectorAll = (node, selector) => {
 	const nodes = [...node.querySelectorAll(selector)],
 	  nodeIterator = document.createNodeIterator(node, Node.ELEMENT_NODE);
@@ -64,11 +64,11 @@ export default class CustomControlbarButton {
 			...attributes,
 		};
 		this.updates.push(x);
-		selector.add('dyte-controlbar-button', x);
+		selector.add('rtk-controlbar-button', x);
 	}
 
 	update(args: Pick<CustomControlbarButtonArgs, 'icon' | 'label'>) {
-		const buttons = querySelectorAll(document.body,'dyte-controlbar-button');
+		const buttons = querySelectorAll(document.body,'rtk-controlbar-button');
 		const button = buttons.find((e) => e.id === this.id);
 		this.updates.forEach((u) => {
 			u.label  = args.label;
@@ -80,13 +80,13 @@ export default class CustomControlbarButton {
 		}
 	}
 
-	register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
+	register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => RtkUiBuilder) {
 		this.meeting = meeting;
 		// Add buttons with config
 		const builder = getBuilder(config);
 
 		if (this.position === 'more-menu') {
-			const lgMoreItems = builder.find('dyte-more-toggle', {
+			const lgMoreItems = builder.find('rtk-more-toggle', {
 				activeMoreMenu: true,
 			});
 			this.#addControlBarButton(lgMoreItems, {
@@ -100,7 +100,7 @@ export default class CustomControlbarButton {
 		}
 
 		// Add button in more menu for different screen sizes
-		const mdMoreItems = builder.find('dyte-more-toggle', {
+		const mdMoreItems = builder.find('rtk-more-toggle', {
 			activeMoreMenu: true,
 			md: true,
 		});
@@ -109,7 +109,7 @@ export default class CustomControlbarButton {
 			slot: 'more-elements',
 		});
 
-		const smMoreItems = builder.find('dyte-more-toggle', {
+		const smMoreItems = builder.find('rtk-more-toggle', {
 			activeMoreMenu: true,
 			sm: true,
 		});

@@ -18,7 +18,7 @@ const STYLE = `
   font-family: inherit;
   container-type: inline-size;
   container-name: backgroundchanger;
-  background-color: rgba(var(--dyte-colors-background-600, 60 60 60) / 0.5);
+  background-color: rgba(var(--rtk-colors-background-600, 60 60 60) / 0.5);
 }
 
 :host([data-open='true']) {
@@ -29,12 +29,12 @@ button {
   box-sizing: border-box;
   background-color: transparent;
   color: white;
-  border: var(--dyte-border-width-sm, 1px) solid transparent;
+  border: var(--rtk-border-width-sm, 1px) solid transparent;
   display: inline-flex;
   flex-grow: 1;
   justify-content: center;
   vertical-align: baseline;
-  gap: var(--dyte-space-1, 4px);
+  gap: var(--rtk-space-1, 4px);
   transition-property: var(--transition-property);
   transition-duration: var(--transition-duration);
   outline: none;
@@ -48,7 +48,7 @@ button {
   overflow: auto;
 
   scrollbar-width: thin;
-  scrollbar-color: var(--dyte-scrollbar-color, rgb(var(--dyte-colors-background-600, 34 34 34))) var(--dyte-scrollbar-background, transparent);
+  scrollbar-color: var(--rtk-scrollbar-color, rgb(var(--rtk-colors-background-600, 34 34 34))) var(--rtk-scrollbar-background, transparent);
 }
 
 img {
@@ -67,7 +67,7 @@ img {
   max-height: 100%;
   min-height: 320px;
   --tw-bg-opacity: 1;
-  background-color: rgba(var(--dyte-colors-background-900, 26 26 26) / var(--tw-bg-opacity));
+  background-color: rgba(var(--rtk-colors-background-900, 26 26 26) / var(--tw-bg-opacity));
   padding: 15px;
   border-radius: 12px;
 }
@@ -85,14 +85,14 @@ img {
   right: 0.75rem;
   height: 24px;
   cursor: pointer;
-  color: rgb(var(--dyte-colors-text-1000, 255 255 255));
+  color: rgb(var(--rtk-colors-text-1000, 255 255 255));
   display: flex;
   align-items: center;
 }
 
 #dismiss-btn:hover {
   --tw-bg-opacity: 1;
-  background-color: rgba(var(--dyte-colors-background-600, 60 60 60) / var(--tw-bg-opacity));
+  background-color: rgba(var(--rtk-colors-background-600, 60 60 60) / var(--tw-bg-opacity));
   color: inherit;
 }
 
@@ -103,17 +103,17 @@ img {
 
 .container {
   position: relative;
-  background-color: rgba(var(--dyte-colors-background-800, 26 26 26) / var(--tw-bg-opacity));
-  border-radius: var(--dyte-space-2, 8px);
-  padding: var(--dyte-space-2, 8px);
-  box-shadow: 0 0 0 0.0625rem rgb(var(--dyte-colors-background-800, 26 26 26)) inset;
+  background-color: rgba(var(--rtk-colors-background-800, 26 26 26) / var(--tw-bg-opacity));
+  border-radius: var(--rtk-space-2, 8px);
+  padding: var(--rtk-space-2, 8px);
+  box-shadow: 0 0 0 0.0625rem rgb(var(--rtk-colors-background-800, 26 26 26)) inset;
   height: 72px;
   width: 72px;
   cursor: pointer;
 }
 
 .container svg {
-    color: rgb(var(--dyte-colors-text-900, 238 238 238));
+    color: rgb(var(--rtk-colors-text-900, 238 238 238));
 }
 
 .image-container {
@@ -122,15 +122,15 @@ img {
   background-image: var(--background);
   background-position: center center;
   background-size: cover;
-  border: 2px solid rgb(var(--dyte-colors-background-800, 26 26 26));
+  border: 2px solid rgb(var(--rtk-colors-background-800, 26 26 26));
 }
 
 .highlighted {
-    border: 2px solid rgb(var(--dyte-colors-brand-500, 26 26 26));
+    border: 2px solid rgb(var(--rtk-colors-brand-500, 26 26 26));
 }
 
 .image-container:hover {
-    border: 2px solid rgb(var(--dyte-colors-brand-500, 26 26 26));
+    border: 2px solid rgb(var(--rtk-colors-brand-500, 26 26 26));
 }
 
 .header {
@@ -138,8 +138,8 @@ img {
   left: 0.75rem;
   font-size: 1.4rem;
   margin: 0;
-  color: rgb(var(--dyte-colors-text-1000, 255 255 255));
-  font-family: var(--dyte-font-family);
+  color: rgb(var(--rtk-colors-text-1000, 255 255 255));
+  font-family: var(--rtk-font-family);
   font-weight: bold;
 }
 
@@ -263,7 +263,7 @@ export class BackgroundChanger extends HTMLElement {
     }
 
     createDialog() {
-        return this.createElement("div", "DyteDialog", "dialog");
+        return this.createElement("div", "RtkDialog", "dialog");
     }
 
     createHeader() {

@@ -6,19 +6,19 @@
             name="viewport"
             content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"
         />
-        <title>Dyte UI Kit Addons</title>
-        <script src="https://cdn.dyte.in/core/dyte-2.4.0.js"></script>
+        <title>RealtimeKit UI Addons</title>
     </head>
     <body>
         <div id="root">
-            <dyte-meeting id="meeting"></dyte-meeting>
+            <rtk-meeting id="meeting"></rtk-meeting>
         </div>
         <script type="module">
-            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.2.2/loader/index.es2017.js";
-            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@2.2.2/dist/esm/index.js";
+            import RealtimeKitClient from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit@0.1.0/dist/index.es.js";
+            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@1.0.0-staging.14/loader/index.es2017.js";
+            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@1.0.0-staging.14/dist/esm/index.js";
 
             // Import addons
-            import DyteVideoBackground from "/src/video-background/index.ts";
+            import RealtimeKitVideoBackground from "/src/video-background/index.ts";
             import ParticipantsTabAction from "/src/participants-tab-action/index.ts";
             import HandRaise from "/src/hand-raise/index.ts";
             import ChatHostControl from "/src/chat-host-control/index.ts";
@@ -60,7 +60,7 @@
                     userBlockType: 'TEMPORARY',
                 });
 
-                const videoBackground = await DyteVideoBackground.init({
+                const videoBackground = await RealtimeKitVideoBackground.init({
                     modes: ["blur", "virtual", "random"],
                     blurStrength: 30, // 0 - 100 for opacity
                     meeting,
@@ -96,7 +96,7 @@
                 meetingRef.config = config;
             }
 
-            async function dyteSetupMeetingAndAddons(authToken, cleanupExistingMeetingIfAny=true) {
+            async function rtkSetupMeetingAndAddons(authToken, cleanupExistingMeetingIfAny=true) {
                 const meetingRef = document.getElementById("meeting");
                 const url = new URL(window.location.href);
                 authToken = authToken || url.searchParams.get("authToken");
@@ -111,7 +111,7 @@
                     await meetingRef.meeting.leave();
                 }
 
-                const meeting = await DyteClient.init({ authToken, modules: {
+                const meeting = await RealtimeKitClient.init({ authToken, modules: {
                     devTools: {
                     logs: true
                 }}});
@@ -127,9 +127,9 @@
                 registerUIKitAddons(meeting);
                 
             };
-            window.dyteSetupMeetingAndAddons = dyteSetupMeetingAndAddons;
+            window.rtkSetupMeetingAndAddons = rtkSetupMeetingAndAddons;
             window.onload = () => {
-                dyteSetupMeetingAndAddons();
+                rtkSetupMeetingAndAddons();
             };
         </script>
     </body>

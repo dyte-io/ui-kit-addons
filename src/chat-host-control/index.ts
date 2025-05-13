@@ -1,8 +1,8 @@
-import { UIConfig } from "@dytesdk/ui-kit";
-import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
-import DyteToggle from "../participants-tab-toggle";
+import { UIConfig } from "@cloudflare/realtimekit-ui";
+import { Meeting } from "@cloudflare/realtimekit-ui/dist/types/types/rtk-client";
+import ParticipantTabToggle from "../participants-tab-toggle";
 import ParticipantMenuItem from "../participant-menu-item";
-import DyteClient, { DyteStore } from "@dytesdk/web-core";
+import RTKClient, { RTKStore } from "@cloudflare/realtimekit";
 
 export type UserBlockType = 'TEMPORARY' | 'PERSISTENT';
 
@@ -10,7 +10,7 @@ export interface ChatHostToggleProps {
     hostPresets: string[];
     targetPresets: string[];
     addActionInParticipantMenu: boolean;
-    meeting: DyteClient;
+    meeting: RTKClient;
     userBlockType?: UserBlockType;
 }
 
@@ -45,7 +45,7 @@ export default class ChatHostToggle {
 
     state = true;
 
-    chatPermissionsStore: DyteStore = undefined;
+    chatPermissionsStore: RTKStore = undefined;
 
     addActionInParticipantMenu = false;
 
@@ -53,7 +53,7 @@ export default class ChatHostToggle {
 
     updateToggleWithoutAction: (state: boolean) => void = () => {};
 
-    button = new DyteToggle({
+    button = new ParticipantTabToggle({
         position: "start",
         label: "Chat",
         onEnabled: () => {
