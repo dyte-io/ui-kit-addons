@@ -1,5 +1,5 @@
-import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
-import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
+import { RtkUiBuilder, UIConfig } from "@cloudflare/realtimekit-ui";
+import { Meeting } from "@cloudflare/realtimekit-ui/dist/types/types/rtk-client";
 import CustomMenu, { ParticipantMenuItemArgs } from "./CustomMenuItem";
 
 
@@ -35,10 +35,10 @@ export default class ParticipantTileMenu {
         return;
     }
 
-    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
-        if (!customElements.get("dyte-participant-tile-menu")) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => RtkUiBuilder) {
+        if (!customElements.get("rtk-participant-tile-menu")) {
             customElements.define(
-                "dyte-participant-tile-menu",
+                "rtk-participant-tile-menu",
                 CustomMenu
             );
         }
@@ -47,8 +47,8 @@ export default class ParticipantTileMenu {
 
         // Add buttons with config
         const builder = getBuilder(config);
-        const dyteParticipant = builder.find(`dyte-participant-tile`);
-        dyteParticipant.add("dyte-participant-tile-menu", {
+        const rtkParticipant = builder.find(`rtk-participant-tile`);
+        rtkParticipant.add("rtk-participant-tile-menu", {
             items: this.args as any,
             position: this.position
         });

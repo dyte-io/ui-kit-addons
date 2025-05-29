@@ -19,8 +19,8 @@ class ActionToggle extends HTMLElement {
           justify-content: center;
           min-height: 30px;
           position: relative;
-          padding: var(--dyte-space-3, 12px);
-          padding-bottom: var(--dyte-space-1, 4px);
+          padding: var(--rtk-space-3, 12px);
+          padding-bottom: var(--rtk-space-1, 4px);
         }
 
         .action-container {
@@ -34,18 +34,18 @@ class ActionToggle extends HTMLElement {
         .action-button {
           box-sizing: border-box;
           background-color: transparent;
-          color: rgb(var(--dyte-colors-text-on-brand-1000, var(--dyte-colors-text-1000, 255 255 255)));
-          background-color: rgba(var(--dyte-colors-brand-500, 33 96 253) / var(--tw-bg-opacity));
+          color: rgb(var(--rtk-colors-text-on-brand-1000, var(--rtk-colors-text-1000, 255 255 255)));
+          background-color: rgba(var(--rtk-colors-brand-500, 33 96 253) / var(--tw-bg-opacity));
           border: 0 solid transparent;
-          border-radius: var(--dyte-border-radius-sm, 4px);
+          border-radius: var(--rtk-border-radius-sm, 4px);
           display: inline-flex;
-          height: var(--dyte-space-8, 32px);
+          height: var(--rtk-space-8, 32px);
           width: 100%;
-          line-height: var(--dyte-space-8, 32px);
+          line-height: var(--rtk-space-8, 32px);
           flex-grow: 1;
           justify-content: center;
           vertical-align: baseline;
-          gap: var(--dyte-space-1, 4px);
+          gap: var(--rtk-space-1, 4px);
           transition-property: var(--transition-property);
           transition-duration: var(--transition-duration);
           outline: none;
@@ -81,12 +81,12 @@ class ActionToggle extends HTMLElement {
     render() {        
         const container = this.createElement("div", "action-container");
         const button = this.createElement(
-            "dyte-switch",
+            "rtk-switch",
             "action-switch"
-        ) as HTMLDyteSwitchElement;
+        ) as HTMLRtkSwitchElement;
         this.state = this.initialValue();
         button.checked = this.state;
-        button.addEventListener("dyteChange", () => {
+        button.addEventListener("rtkChange", () => {
             if (button.checked == this.state) return;
             this.state = button.checked;
             if (button.checked) {
