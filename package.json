@@ -1,6 +1,6 @@
 {
   "name": "@cloudflare/realtimekit-ui-addons",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A collection of Cloudflare RealtimeKit UI addons",
   "type": "module",
   "exports": {
@@ -114,12 +114,12 @@
   "author": "Cloudflare Inc.",
   "license": "UNLICENSED",
   "dependencies": {
-    "@cloudflare/realtimekit-virtual-background": "0.0.2-staging.2"
+    "@cloudflare/realtimekit-virtual-background": "0.0.2"
   },
   "main": "index.js",
   "peerDependencies": {
-    "@cloudflare/realtimekit-ui": "1.0.0-staging.14",
-    "@cloudflare/realtimekit": "0.5.0-staging.112"
+    "@cloudflare/realtimekit-ui": ">=1.0.1",
+    "@cloudflare/realtimekit": ">=1.0.1"
   },
   "devDependencies": {
     "typescript": "^5.2.2",
@@ -127,10 +127,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rtk-io/ui-kit-addons.git"
+    "url": "git+https://github.com/dyte-io/ui-kit-addons.git"
   },
   "bugs": {
-    "url": "https://github.com/rtk-io/ui-kit-addons/issues"
+    "url": "https://github.com/dyte-io/ui-kit-addons/issues"
   },
-  "homepage": "https://github.com/rtk-io/ui-kit-addons#readme"
+  "homepage": "https://github.com/dyte-io/ui-kit-addons#readme"
 }

@@ -13,9 +13,9 @@
     <br />
     <a href="https://demo.realtime.cloudflare.com">View Demo</a>
     ·
-    <a href="https://github.com/rtk-io/ui-kit-addons/issues">Report Bug</a>
+    <a href="https://github.com/dyte-io/ui-kit-addons/issues">Report Bug</a>
     ·
-    <a href="https://github.com/rtk-io/ui-kit-addons/issues">Request Feature</a>
+    <a href="https://github.com/dyte-io/ui-kit-addons/issues">Request Feature</a>
   </p>
 </p>
 
@@ -35,7 +35,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This [repository](https://github.com/rtk-io/ui-kit-addons) contains all the ui-kit addons available for the RealtimeKit Web SDK.
+This [repository](https://github.com/dyte-io/ui-kit-addons) contains all the ui-kit addons available for the RealtimeKit Web SDK.
 
 A comprehensive guide detailing the usage of these ui-kit addons is available [here](https://dyte.io/blog/ui-kit-add-ons/).
 
@@ -155,8 +155,8 @@ await videoBackground.removeBackground();
 
 ## About
 
-This project is created & maintained by Cloudflare, Inc. You can find us on Twitter - [@dyte_io](https://twitter.com/dyte_io) or write to us at `https://dyte.io/contact`.
+This project is created & maintained by Cloudflare, Inc.
 
 The names and logos for Cloudflare are trademarks of Cloudflare, Inc.
 
-We love open source software! See [our other projects](https://github.com/rtk-io) and [our products](https://dyte.io).
+We love open source software! See [our other projects](https://github.com/dyte-io) and [our products](https://dyte.io).
