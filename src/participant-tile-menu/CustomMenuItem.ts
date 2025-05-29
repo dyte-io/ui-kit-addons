@@ -22,15 +22,15 @@ export default class CustomMenu extends HTMLElement {
         this.shadow = this.attachShadow({ mode: "open" });
         const style = document.createElement("style");
         style.innerText = `
-            dyte-menu:hover {
+            rtk-menu:hover {
                 cursor: pointer;
             }
-            dyte-menu-item {
-                background: rgba(var(--dyte-colors-background-700, 50 50 50) / var(--tw-bg-opacity));
+            rtk-menu-item {
+                background: rgba(var(--rtk-colors-background-700, 50 50 50) / var(--tw-bg-opacity));
                 width: max-content;
             }
-            dyte-menu-item:hover {
-                background: rgba(var(--dyte-colors-background-600, 50 50 50) / var(--tw-bg-opacity));
+            rtk-menu-item:hover {
+                background: rgba(var(--rtk-colors-background-600, 50 50 50) / var(--tw-bg-opacity));
             }
         `;
         this.shadow.appendChild(style);
@@ -42,7 +42,7 @@ export default class CustomMenu extends HTMLElement {
     }
 
     render() {
-        const container = document.createElement("dyte-menu");
+        const container = document.createElement("rtk-menu");
         container.style.position = 'absolute';
         container.style.top = '8px';
         container.style.right = '8px';
@@ -65,7 +65,7 @@ export default class CustomMenu extends HTMLElement {
         button.innerHTML = '<svg style="width: 20px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7.75a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5ZM12 13.75a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5ZM10.25 18a1.75 1.75 0 1 0 3.5 0 1.75 1.75 0 0 0-3.5 0Z" fill="currentColor"/></svg>';
         container.appendChild(button);
         this.items.forEach((i) => {
-            const menuItem = document.createElement("dyte-menu-item");
+            const menuItem = document.createElement("rtk-menu-item");
             menuItem.innerText = i.label;
             menuItem.onclick = () => {
                 let parentNode = this.shadow.host;

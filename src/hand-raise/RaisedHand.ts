@@ -1,4 +1,4 @@
-import { DyteStore } from "@dytesdk/web-core";
+import { RTKStore } from "@cloudflare/realtimekit";
 import { HandRaiseIcon } from "./HandRaiseButton";
 
 export default class RaisedHand extends HTMLElement {
@@ -7,7 +7,7 @@ export default class RaisedHand extends HTMLElement {
     _raised = false;
     _meeting = undefined;
     
-    handRaisedStore: DyteStore = undefined;
+    handRaisedStore: RTKStore = undefined;
     
     static icon = HandRaiseIcon;
 
@@ -57,7 +57,7 @@ export default class RaisedHand extends HTMLElement {
         
         /**
          * NOTE(ravindra-dyte): this is needed since PIP of web-core relies on this
-         * In future, Web Core should also start using DyteStore
+         * In future, Web Core should also start using RTKStore
         */
         participant.raised = this.raised;
 
@@ -87,7 +87,7 @@ export default class RaisedHand extends HTMLElement {
 	  <style>
 		:host {
 		  display: ${this.raised ? 'flex': 'none'};
-          color: var(--dyte-colors-brand-500, 33 96 253);
+          color: var(--rtk-colors-brand-500, 33 96 253);
 		}
 	  </style>
 	  <div style="position: absolute; top: 5px; right: 5px; height: 32px; width: 32px;">

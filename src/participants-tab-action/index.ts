@@ -1,5 +1,5 @@
-import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
-import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
+import { RtkUiBuilder, UIConfig } from "@cloudflare/realtimekit-ui";
+import { Meeting } from "@cloudflare/realtimekit-ui/dist/types/types/rtk-client";
 import ActionButton from "./ActionButton";
 
 export interface ParticipantTabActionArgs {
@@ -49,7 +49,7 @@ export default class ParticipantTabAction {
         // TODO: Remove the changer from the body
     }
 
-    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => RtkUiBuilder) {
         if (!customElements.get("participant-tab-action-button")) {
             customElements.define(
                 "participant-tab-action-button",
@@ -58,13 +58,13 @@ export default class ParticipantTabAction {
         }
 
         this.meeting = meeting;
-        if (!config.root["dyte-participants"]) {
-            config.root["dyte-participants"] = {};
+        if (!config.root["rtk-participants"]) {
+            config.root["rtk-participants"] = {};
         }
 
         // Add buttons with config
         const builder = getBuilder(config);
-        const participants = builder.find(`dyte-participants`);
+        const participants = builder.find(`rtk-participants`);
         participants.add("participant-tab-action-button", {
             slot: this.position,
             label: this.label,

@@ -1,5 +1,5 @@
-import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
-import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
+import { RtkUiBuilder, UIConfig } from "@cloudflare/realtimekit-ui";
+import { Meeting } from "@cloudflare/realtimekit-ui/dist/types/types/rtk-client";
 import ActionToggle from "./ActionToggle";
 
 export interface ParticipantTabToggleArgs {
@@ -69,7 +69,7 @@ export default class ParticipantTabToggle {
         // TODO: Remove the changer from the body
     }
 
-    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
+    register(config: UIConfig, meeting: Meeting, getBuilder: (c: UIConfig) => RtkUiBuilder) {
         if (!customElements.get("participant-tab-toggle")) {
             customElements.define(
                 "participant-tab-toggle",
@@ -80,13 +80,13 @@ export default class ParticipantTabToggle {
         this.meeting = meeting;
         if(!config.root) return config;
 
-        if (!config.root["dyte-participants"]) {
-            config.root["dyte-participants"] = {};
+        if (!config.root["rtk-participants"]) {
+            config.root["rtk-participants"] = {};
         }
 
         // Add buttons with config
         const builder = getBuilder(config);
-        const participants = builder.find(`dyte-participants`);
+        const participants = builder.find(`rtk-participants`);
         participants?.add("participant-tab-toggle", {
             slot: this.position,
             label: this.label,

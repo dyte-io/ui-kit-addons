@@ -1,4 +1,4 @@
-import { DyteStore } from '@dytesdk/web-core';
+import { RTKStore } from '@cloudflare/realtimekit';
 
 const STYLES = `
     :host {
@@ -6,52 +6,52 @@ const STYLES = `
         width: 100%;
         flex-direction: column;
         line-height: initial;
-        font-family: var(--dyte-font-family, sans-serif);
+        font-family: var(--rtk-font-family, sans-serif);
         font-feature-settings: normal;
         font-variation-settings: normal;
-        margin-top: var(--dyte-space-2, 8px);
-        margin-bottom: var(--dyte-space-2, 8px);
+        margin-top: var(--rtk-space-2, 8px);
+        margin-bottom: var(--rtk-space-2, 8px);
         box-sizing: border-box;
-        padding-left: var(--dyte-space-3, 12px);
-        padding-right: var(--dyte-space-3, 12px);
-        padding-top: var(--dyte-space-0, 0px);
-        padding-bottom: var(--dyte-space-0, 0px);
+        padding-left: var(--rtk-space-3, 12px);
+        padding-right: var(--rtk-space-3, 12px);
+        padding-top: var(--rtk-space-0, 0px);
+        padding-bottom: var(--rtk-space-0, 0px);
         flex-basis: 0px;
     }
 
     .container {
-        margin-bottom: var(--dyte-space-4, 16px);
+        margin-bottom: var(--rtk-space-4, 16px);
         width: 100%;
     }
 
     .heading-count {
-        margin: var(--dyte-space-0, 0px);
+        margin: var(--rtk-space-0, 0px);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: var(--dyte-space-0, 0px);
+        padding: var(--rtk-space-0, 0px);
         font-size: 14px;
         font-weight: 400;
-        color: rgb(var(--dyte-colors-text-900, 255 255 255 / 0.88));
+        color: rgb(var(--rtk-colors-text-900, 255 255 255 / 0.88));
         text-align: center;
     }
 
     .participants {
-        margin-top: var(--dyte-space-2, 8px);
-        margin-bottom: var(--dyte-space-0, 0px);
-        padding: var(--dyte-space-0, 0px);
+        margin-top: var(--rtk-space-2, 8px);
+        margin-bottom: var(--rtk-space-0, 0px);
+        padding: var(--rtk-space-0, 0px);
         list-style-type: none;
     }
 
-    :host dyte-avatar {
-      height: var(--dyte-space-8, 32px);
-      width: var(--dyte-space-8, 32px);
-      margin-right: var(--dyte-space-2, 8px);
+    :host rtk-avatar {
+      height: var(--rtk-space-8, 32px);
+      width: var(--rtk-space-8, 32px);
+      margin-right: var(--rtk-space-2, 8px);
     }
 
     .participant-details {
       display: flex;
-      height: var(--dyte-space-14, 56px);
+      height: var(--rtk-space-14, 56px);
       align-items: center;
       justify-content: space-between;
     }
@@ -82,7 +82,7 @@ export class HandRaisedList extends HTMLElement {
 
     _onRemove = undefined;
 
-    handRaisedStore: DyteStore = undefined;
+    handRaisedStore: RTKStore = undefined;
 
     constructor() {
         super();
@@ -137,7 +137,7 @@ export class HandRaisedList extends HTMLElement {
         );
 
         const left = this.createElement("div", "left");
-        const avatar = this.createElement("dyte-avatar", "avatar");
+        const avatar = this.createElement("rtk-avatar", "avatar");
         avatar.setAttribute("participant", participant);
         avatar.setAttribute("size", "sm");
         left.appendChild(avatar);
@@ -148,7 +148,7 @@ export class HandRaisedList extends HTMLElement {
 
         const right = this.createElement("div", "right");
         const controls = this.createElement("div", "controls");
-        const lowerHand = this.createElement("dyte-button", "lower-hand");
+        const lowerHand = this.createElement("rtk-button", "lower-hand");
         // @ts-ignore
         lowerHand.label = 'Lower Hand';
         // @ts-ignore
@@ -160,7 +160,7 @@ export class HandRaisedList extends HTMLElement {
             this._onRemove ? this._onRemove(participant.id) : null;
         };
 
-        const i = this.createElement('dyte-icon', 'icon');
+        const i = this.createElement('rtk-icon', 'icon');
         // @ts-ignore
         i.icon = removeIcon;
         // @ts-ignore

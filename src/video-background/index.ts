@@ -1,10 +1,10 @@
-import { DyteUIBuilder, UIConfig } from "@dytesdk/ui-kit";
-import { Meeting } from "@dytesdk/ui-kit/dist/types/types/dyte-client";
-import DyteVideoBackgroundTransformer from "@dytesdk/video-background-transformer";
+import { RtkUiBuilder, UIConfig } from "@cloudflare/realtimekit-ui";
+import { Meeting } from "@cloudflare/realtimekit-ui/dist/types/types/rtk-client";
+import RealtimeKitVideoBackgroundTransformer from "@cloudflare/realtimekit-virtual-background";
 import type { BackgroundMode } from "./BackgroundChanger";
 import { BackgroundChanger } from "./BackgroundChanger";
-import { PostProcessingConfig } from "@dytesdk/video-background-transformer/types/client/DyteVideoBackgroundTransformer";
-import { SegmentationConfig } from "@dytesdk/video-background-transformer/types/core/helpers/segmentationHelper";
+import { PostProcessingConfig } from "@cloudflare/realtimekit-virtual-background/types/client/RealtimeKitVideoBackgroundTransformer";
+import { SegmentationConfig } from "@cloudflare/realtimekit-virtual-background/types/core/helpers/segmentationHelper";
 
 export interface VideoBGAddonArgs {
     images?: string[];
@@ -28,7 +28,7 @@ const defaultIcon =
 /**
  * VideoBGAddon
  * @description
- * Addon to add video background effects to dyte meeting
+ * Addon to add video background effects to RealtimeKit meeting
  * @example
  * const addon = new VideoBGAddon({
  *   images: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
@@ -49,7 +49,7 @@ export default class VideoBGAddon {
     buttonIcon?: string;
     segmentationConfig?: Partial<SegmentationConfig>;
     postProcessingConfig?: Partial<PostProcessingConfig>;
-    transform: DyteVideoBackgroundTransformer | null = null;
+    transform: RealtimeKitVideoBackgroundTransformer | null = null;
     currentBackgroundMode: 'blur' | 'virtual' | 'none' = 'none';
     currentBackgroundURL:  string | null = null;
     videoBackgroundChanger: BackgroundChanger | null = null;
@@ -70,8 +70,8 @@ export default class VideoBGAddon {
         }
         this.segmentationConfig = args?.segmentationConfig || {};
         this.postProcessingConfig = args?.postProcessingConfig || {};
-        if (customElements.get("dyte-background-changer")) return;
-        customElements.define("dyte-background-changer", BackgroundChanger);
+        if (customElements.get("rtk-background-changer")) return;
+        customElements.define("rtk-background-changer", BackgroundChanger);
     }
 
     static async init(args?: VideoBGAddonArgs) {
@@ -85,21 +85,21 @@ export default class VideoBGAddon {
 
         await videoBGAddon.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
         
-        videoBGAddon.transform = await DyteVideoBackgroundTransformer.init({
+        videoBGAddon.transform = await RealtimeKitVideoBackgroundTransformer.init({
             // @ts-ignore
             meeting: videoBGAddon.meeting,
             segmentationConfig: videoBGAddon.segmentationConfig || {},
             postProcessingConfig: videoBGAddon.postProcessingConfig || {},
         });
 
-        const elements = document.getElementsByTagName("dyte-background-changer")
+        const elements = document.getElementsByTagName("rtk-background-changer")
         
         if (elements[0]) {
-            // remove dyte-background-changer
+            // remove rtk-background-changer
             elements[0].remove();
         }
 
-        const changer = document.createElement("dyte-background-changer") as BackgroundChanger;
+        const changer = document.createElement("rtk-background-changer") as BackgroundChanger;
 
         videoBGAddon.videoBackgroundChanger = changer;
 
@@ -184,7 +184,7 @@ export default class VideoBGAddon {
     }
 
     public async applyVirtualBackground(imageURL: string, imageAsDataURL?: string): Promise<{ isSuccessful: boolean; code: string; error?: string }> {
-        if (!DyteVideoBackgroundTransformer.isSupported()){
+        if (!RealtimeKitVideoBackgroundTransformer.isSupported()){
             return {
                 isSuccessful: false,
                 code: 'UNSUPPORTED_BROWSER',
@@ -251,7 +251,7 @@ export default class VideoBGAddon {
     }
 
     public async applyBlurBackground(): Promise<{ isSuccessful: boolean; code: string; error?: string }> {
-        if (!DyteVideoBackgroundTransformer.isSupported()){
+        if (!RealtimeKitVideoBackgroundTransformer.isSupported()){
             return {
                 isSuccessful: false,
                 code: 'UNSUPPORTED_BROWSER',
@@ -332,14 +332,14 @@ export default class VideoBGAddon {
     }
 
     private addControlBarButton(selector: any, attributes: { [key: string]: any }) {
-        selector.add("dyte-controlbar-button", {
+        selector.add("rtk-controlbar-button", {
             id: "effects",
             label: this.buttonLabel,
             icon: this.buttonIcon ?? defaultIcon,
             // @ts-ignore
             onClick: () => {
                 const changer = document.querySelector(
-                    "dyte-background-changer"
+                    "rtk-background-changer"
                 );
                 if (changer) {
                     const isOpen =
@@ -354,8 +354,8 @@ export default class VideoBGAddon {
         });
     }
 
-    public register(config: UIConfig, _meeting: Meeting, getBuilder: (c: UIConfig) => DyteUIBuilder) {
-        if (!DyteVideoBackgroundTransformer.isSupported()) return config;
+    public register(config: UIConfig, _meeting: Meeting, getBuilder: (c: UIConfig) => RtkUiBuilder) {
+        if (!RealtimeKitVideoBackgroundTransformer.isSupported()) return config;
 
         // Add buttons with config
         const builder = getBuilder(config);
@@ -373,7 +373,7 @@ export default class VideoBGAddon {
         this.addControlBarButton(controlBar, {});
 
         // Add button in more menu for different screen sizes
-        const mdMoreItems = builder.find("dyte-more-toggle", {
+        const mdMoreItems = builder.find("rtk-more-toggle", {
             activeMoreMenu: true,
             md: true
         });
@@ -382,7 +382,7 @@ export default class VideoBGAddon {
             slot: "more-elements"
         });
 
-        const smMoreItems = builder.find("dyte-more-toggle", {
+        const smMoreItems = builder.find("rtk-more-toggle", {
             activeMoreMenu: true,
             sm: true
         });

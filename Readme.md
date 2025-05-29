@@ -1,21 +1,21 @@
 <!-- PROJECT LOGO -->
 <p align="center">
-  <a href="https://dyte.in">
-    <img src="https://dyte-uploads.s3.ap-south-1.amazonaws.com/dyte-logo-dark.svg" alt="Logo" width="80">
+  <a href="https://realtime.cloudflare.com">
+    <img src="https://docs.realtime.cloudflare.com/logo/cf.svg" alt="Logo" width="120">
   </a>
-  <h3 align="center">Dyte Ui Kit addon</h3>
+  <h3 align="center">RealtimeKit Ui Addons</h3>
 
   <p align="center">
-    A collection of ui-kit addons that extends the Dyte's prebuilt ui-kit capability.
+    A collection of ui-kit addons that extends the RealtimeKit's prebuilt ui-kit capability.
     <br />
-    <a href="https://docs.dyte.io"><strong>Explore the docs »</strong></a>
+    <a href="https://docs.realtime.cloudflare.com"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://demo.dyte.io">View Demo</a>
+    <a href="https://demo.realtime.cloudflare.com">View Demo</a>
     ·
-    <a href="https://docs.dyte.io/discuss">Report Bug</a>
+    <a href="https://github.com/dyte-io/ui-kit-addons/issues">Report Bug</a>
     ·
-    <a href="https://docs.dyte.io/discuss">Request Feature</a>
+    <a href="https://github.com/dyte-io/ui-kit-addons/issues">Request Feature</a>
   </p>
 </p>
 
@@ -35,7 +35,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This [repository](https://github.com/dyte-io/ui-kit-addons) contains all the ui-kit addons available for the Dyte Web SDK.
+This [repository](https://github.com/dyte-io/ui-kit-addons) contains all the ui-kit addons available for the RealtimeKit Web SDK.
 
 A comprehensive guide detailing the usage of these ui-kit addons is available [here](https://dyte.io/blog/ui-kit-add-ons/).
 
@@ -61,14 +61,14 @@ To use these addons you would need to do the following steps:
 1. Install the addon package:
 
 ```sh
-npm install @dytesdk/ui-kit-addons
+npm install @cloudflare/realtimekit-ui-addons
 ```
 
 2. Import the addon that you need, for example:
    `custom-controlbar-button`:
 
 ```ts
-import CustomControlbarButton from '@dytesdk/ui-kit-addons/custom-controlbar-button';
+import CustomControlbarButton from '@cloudflare/realtimekit-ui-addons/custom-controlbar-button';
 ```
 
 3. Configure the addon
@@ -85,7 +85,7 @@ const myButton = new CustomControlbarButton({
 4. Register addon
 
 ```ts
-import { registerAddons } from dytesdk/ui-kit;
+import { registerAddons } from "@cloudflare/realtimekit-ui";
 ...
 const newConfig = registerAddons([myButton], meeting);
 ```
@@ -93,16 +93,10 @@ const newConfig = registerAddons([myButton], meeting);
 5. Pass the config to meeting UI
 
 ```
-<dyte-meeting meeting={meeting} config={newConfig}></dyte-meeting> 
+<rtk-meeting meeting={meeting} config={newConfig}></rtk-meeting> 
 ```
 
-## Version Compatibility
-
-This version of UI Kit addon requires Web Core 2.x for Video Background addon to work properly. Without Web Core 2.x, a blank screen might get shown instead of the user's video.
-
-If in case you haven't migrated to Web Core 2.x yet, Please use [1.1.13](https://www.npmjs.com/package/@dytesdk/ui-kit-addons/v/1.1.13) of this UI Kit addon package instead.
-
-Few of the addons such as HandRaise, Chat Host Control & Mic Host Control have been migrated to use an `async static init` method instead of the constructor, to utilise meeting store APIs, with async await.
+Most of the addons such as HandRaise, Chat Host Control & Mic Host Control have been migrated to use an `async static init` method instead of the constructor, to utilise meeting store APIs, with async await.
 
 For all such addons, rather than calling their constructor, init method should be called.
 
@@ -135,12 +129,8 @@ const cameraHostControl = await CameraHostControl.init({
     targetPresets: ['webinar_viewer'],
     addActionInParticipantMenu: true,
 });
-```
 
-Starting v4.0.0, Video Background Addon also has been migrated to the same structure to make it easier to handle state internally.
-
-```tsx
-  const videoBackground = await DyteVideoBackground.init({
+  const videoBackground = await RealtimeKitVideoBackground.init({
       modes: ["blur", "virtual", "random"],
       blurStrength: 30, // 0 - 100 for opacity
       meeting,
@@ -153,7 +143,7 @@ Starting v4.0.0, Video Background Addon also has been migrated to the same struc
   });
 ```
 
-you can now apply, replace, or remove a background programmatically.
+you can apply, replace, or remove a background programmatically.
 
 ```tsx
 await videoBackground.applyVirtualBackground('https://images.unsplash.com/photo-1600431521340-491eca880813?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3')
@@ -165,8 +155,8 @@ await videoBackground.removeBackground();
 
 ## About
 
-This project is created & maintained by dyte, Inc. You can find us on Twitter - [@dyte_io](https://twitter.com/dyte_io) or write to us at `dev@dyte.io`.
+This project is created & maintained by Cloudflare, Inc.
 
-The names and logos for Dyte are trademarks of dyte, Inc.
+The names and logos for Cloudflare are trademarks of Cloudflare, Inc.
 
 We love open source software! See [our other projects](https://github.com/dyte-io) and [our products](https://dyte.io).

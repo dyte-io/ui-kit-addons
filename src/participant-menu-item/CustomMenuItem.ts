@@ -76,7 +76,7 @@ export default class CustomMenuItem extends HTMLElement {
     updateLabel(container: any) {
         container.innerHTML = "";
         if (this.icon || this.state.icon) {
-            const icon = document.createElement("dyte-icon");
+            const icon = document.createElement("rtk-icon");
             icon.setAttribute("icon", this.state.icon || this.icon);
             icon.className = this.state.iconClass || "";
             icon.setAttribute("size", "md");
@@ -93,7 +93,7 @@ export default class CustomMenuItem extends HTMLElement {
     }
 
     render() {
-        const container = document.createElement("dyte-menu-item");
+        const container = document.createElement("rtk-menu-item");
         container.onclick = () => {
             if (this.participant) {
                 this._onClick(this.participant.id);

@@ -1,4 +1,4 @@
-import { DyteStore } from "@dytesdk/web-core";
+import { RTKStore } from "@cloudflare/realtimekit";
 
 // svg string of raised hand
 export const HandRaiseIcon =
@@ -11,7 +11,7 @@ export class HandRaiseButton extends HTMLElement {
 
     _onclick = undefined;
 
-    handRaisedStore: DyteStore = undefined;
+    handRaisedStore: RTKStore = undefined;
 
     constructor() {
         super();
@@ -26,7 +26,7 @@ export class HandRaiseButton extends HTMLElement {
 
     attributeChangedCallback(name: string, _, newValue: string) {
         if (name === 'size') {
-            const button = this.shadowRoot.querySelector('dyte-controlbar-button');
+            const button = this.shadowRoot.querySelector('rtk-controlbar-button');
             switch(newValue) {
                 case 'sm':
                 case 'md':
@@ -74,7 +74,7 @@ export class HandRaiseButton extends HTMLElement {
 
     updateContent(){
         const handRaised = !!this.handRaisedStore.get(this.meeting.self.id)?.raised;
-        const button = this.shadowRoot.querySelector('dyte-controlbar-button');
+        const button = this.shadowRoot.querySelector('rtk-controlbar-button');
         
         if (handRaised) {
             button.classList.add("active");
@@ -86,7 +86,7 @@ export class HandRaiseButton extends HTMLElement {
     connectedCallback() {
         this.handRaisedStore = this.meeting.stores.stores.get('handRaise');
 
-        const button = document.createElement("dyte-controlbar-button");
+        const button = document.createElement("rtk-controlbar-button");
         button.setAttribute("id", "raise-hand");
         button.setAttribute("label", "Raise Hand");
         button.setAttribute("icon", HandRaiseIcon);
