@@ -6,6 +6,8 @@ import { BackgroundChanger } from "./BackgroundChanger";
 import { PostProcessingConfig } from "@cloudflare/realtimekit-virtual-background/types/client/RealtimeKitVideoBackgroundTransformer";
 import { SegmentationConfig } from "@cloudflare/realtimekit-virtual-background/types/core/helpers/segmentationHelper";
 
+export type BackgroundModes = 'blur' | 'virtual' | 'none';
+
 export interface VideoBGAddonArgs {
     images?: string[];
     meeting: Meeting;
@@ -19,6 +21,7 @@ export interface VideoBGAddonArgs {
     buttonIcon?: string;
     segmentationConfig?: Partial<SegmentationConfig>;
     postProcessingConfig?: Partial<PostProcessingConfig>;
+    onVideoBackgroundUpdate?: ({backgroundMode, backgroundURL} : {backgroundMode: BackgroundModes, backgroundURL: string}) => (void | Promise<void>);
 }
 
 // svg string of effects icon
@@ -50,9 +53,10 @@ export default class VideoBGAddon {
     segmentationConfig?: Partial<SegmentationConfig>;
     postProcessingConfig?: Partial<PostProcessingConfig>;
     transform: RealtimeKitVideoBackgroundTransformer | null = null;
-    currentBackgroundMode: 'blur' | 'virtual' | 'none' = 'none';
+    currentBackgroundMode: BackgroundModes = 'none';
     currentBackgroundURL:  string | null = null;
     videoBackgroundChanger: BackgroundChanger | null = null;
+    onVideoBackgroundUpdate: VideoBGAddonArgs['onVideoBackgroundUpdate'] = null;
 
     private constructor(args?: VideoBGAddonArgs) {
         this.images = args?.images ?? [];
@@ -70,8 +74,34 @@ export default class VideoBGAddon {
         }
         this.segmentationConfig = args?.segmentationConfig || {};
         this.postProcessingConfig = args?.postProcessingConfig || {};
+        this.onVideoBackgroundUpdate = args?.onVideoBackgroundUpdate || null;
         if (customElements.get("rtk-background-changer")) return;
         customElements.define("rtk-background-changer", BackgroundChanger);
+    }
+
+    private notifyVideoBackgroundUpdate(){
+        // notify async so that the addon does not crash in case of issues in the callback
+        setTimeout(() => {
+            if(this.onVideoBackgroundUpdate){
+                this.onVideoBackgroundUpdate({
+                    backgroundMode: this.currentBackgroundMode,
+                    backgroundURL: this.currentBackgroundURL,
+                });
+            }
+        }, 0);
+    }
+
+    private async initializeCoreVideoBackgroundTransformerIfNeeded(){
+        if(this.transform){
+            return;
+        }
+        await this.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
+        
+        this.transform = await DyteVideoBackgroundTransformer.init({
+            meeting: this.meeting,
+            segmentationConfig: this.segmentationConfig || {},
+            postProcessingConfig: this.postProcessingConfig || {},
+        });
     }
 
     static async init(args?: VideoBGAddonArgs) {
@@ -83,14 +113,20 @@ export default class VideoBGAddon {
             videoBGAddon.images.push(...randomImages);
         }
 
-        await videoBGAddon.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
+        /**
+         * NOTE(ravindra-dyte):
+         *  To speed up the initialisation and meeting load,
+         *  below part is commented out and optionally initialized using `initializeCoreVideoBackgroundTransformerIfNeeded`.
+         *  `initializeCoreVideoBackgroundTransformerIfNeeded` method is called when first middleware is applied.
+         */
+        // await videoBGAddon.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
         
-        videoBGAddon.transform = await RealtimeKitVideoBackgroundTransformer.init({
-            // @ts-ignore
-            meeting: videoBGAddon.meeting,
-            segmentationConfig: videoBGAddon.segmentationConfig || {},
-            postProcessingConfig: videoBGAddon.postProcessingConfig || {},
-        });
+        // videoBGAddon.transform = await RealtimeKitVideoBackgroundTransformer.init({
+        //    // @ts-ignore
+        //    meeting: videoBGAddon.meeting,
+        //    segmentationConfig: videoBGAddon.segmentationConfig || {},
+        //    postProcessingConfig: videoBGAddon.postProcessingConfig || {},
+        // });
 
         const elements = document.getElementsByTagName("rtk-background-changer")
         
@@ -110,7 +146,7 @@ export default class VideoBGAddon {
         changer['isVideoBackgroundUpdateOngoing'] = false;
 
         changer.onChange = async (mode: BackgroundMode, imageURL?: string, imageElement?: HTMLImageElement) => {
-            if (!videoBGAddon.meeting || !videoBGAddon.transform) return;
+            if (!videoBGAddon.meeting) return;
             
             if (mode === "blur") {
                 await videoBGAddon.applyBlurBackground();
@@ -217,6 +253,7 @@ export default class VideoBGAddon {
         }
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.initializeCoreVideoBackgroundTransformerIfNeeded();
 
         await this.removeCurrentMiddleware();
 
@@ -244,6 +281,8 @@ export default class VideoBGAddon {
         
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
         
+        this.notifyVideoBackgroundUpdate();
+
         return {
             isSuccessful: true,
             code: 'SUCCESSFUL',
@@ -268,6 +307,7 @@ export default class VideoBGAddon {
         }
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.initializeCoreVideoBackgroundTransformerIfNeeded();
 
         await this.removeCurrentMiddleware();
         
@@ -279,6 +319,8 @@ export default class VideoBGAddon {
 
         this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+
+        this.notifyVideoBackgroundUpdate();
 
         return {
             isSuccessful: true,
@@ -317,9 +359,13 @@ export default class VideoBGAddon {
         }
 
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  true;
+        await this.initializeCoreVideoBackgroundTransformerIfNeeded();
+        
         await this.removeCurrentMiddleware();
         this.videoBackgroundChanger.highlightSelectedMiddleware(this.currentBackgroundMode, this.currentBackgroundURL);
         this.videoBackgroundChanger['isVideoBackgroundUpdateOngoing'] =  false;
+
+        this.notifyVideoBackgroundUpdate();
 
         return {
             isSuccessful: true,

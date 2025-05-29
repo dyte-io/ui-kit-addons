@@ -140,6 +140,9 @@ const cameraHostControl = await CameraHostControl.init({
           "https://images.unsplash.com/photo-1600431521340-491eca880813?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3"
       ],
       randomCount: 10,
+      onVideoBackgroundUpdate: ({backgroundMode, backgroundURL}) => { 
+        console.log('videoBackgroundUpdated => ', {backgroundMode, backgroundURL});
+      }, // Listen to background update action
   });
 ```
 
