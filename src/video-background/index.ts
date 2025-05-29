@@ -97,7 +97,7 @@ export default class VideoBGAddon {
         }
         await this.meeting.self.setVideoMiddlewareGlobalConfig({ disablePerFrameCanvasRendering: true });
         
-        this.transform = await DyteVideoBackgroundTransformer.init({
+        this.transform = await RealtimeKitVideoBackgroundTransformer.init({
             meeting: this.meeting,
             segmentationConfig: this.segmentationConfig || {},
             postProcessingConfig: this.postProcessingConfig || {},
