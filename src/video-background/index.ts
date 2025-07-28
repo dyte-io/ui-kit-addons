@@ -128,11 +128,11 @@ export default class VideoBGAddon {
         //    postProcessingConfig: videoBGAddon.postProcessingConfig || {},
         // });
 
-        const elements = document.getElementsByTagName("rtk-background-changer")
+        let existingBackgroundChangerContainer = videoBGAddon.selector ? document.querySelector(videoBGAddon.selector) : document;
+        const existingBackgroundChanger = existingBackgroundChangerContainer?.querySelector("rtk-background-changer");
         
-        if (elements[0]) {
-            // remove rtk-background-changer
-            elements[0].remove();
+        if (existingBackgroundChanger) {
+            existingBackgroundChanger.remove();
         }
 
         const changer = document.createElement("rtk-background-changer") as BackgroundChanger;
@@ -384,13 +384,12 @@ export default class VideoBGAddon {
             icon: this.buttonIcon ?? defaultIcon,
             // @ts-ignore
             onClick: () => {
-                const changer = document.querySelector(
-                    "rtk-background-changer"
-                );
-                if (changer) {
+                let backgroundChangerContainer = this.selector ? document.querySelector(this.selector) : document;
+                const backgroundChanger = backgroundChangerContainer?.querySelector("rtk-background-changer");
+                if (backgroundChanger) {
                     const isOpen =
-                        changer?.getAttribute("data-open") === "true";
-                    changer.setAttribute(
+                    backgroundChanger?.getAttribute("data-open") === "true";
+                    backgroundChanger.setAttribute(
                         "data-open",
                         isOpen ? "false" : "true"
                     );
