@@ -16,6 +16,12 @@
       "default": "./dist/hand-raise.cjs",
       "types": "./dist/esm/hand-raise/index.d.ts"
     },
+     "./reactions-manager": {
+      "import": "./dist/reactions-manager.js",
+      "require": "./dist/reactions-manager.cjs",
+      "default": "./dist/reactions-manager.cjs",
+      "types": "./dist/esm/reactions-manager/index.d.ts"
+    },
     "./video-background": {
       "import": "./dist/video-background.js",
       "require": "./dist/video-background.cjs",
