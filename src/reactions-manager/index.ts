@@ -57,11 +57,14 @@ class ReactionsManagerAddon {
         if (!controlBarLeft) return config;
         const controlBarMobile = builder.find("div#controlbar-mobile");
         if (!controlBarMobile) return config;
+        const participants = builder.find("rtk-stage");
+        if (!participants) return config;
         const participantTile = builder.find("rtk-participant-tile");
         if (!participantTile) return config;
 
-        // Add reaction overlay on participant tiles to show floating reactions
-        participantTile.add("rtk-reaction-overlay", {
+        // Add a single global reaction overlay on the participants container
+        // so that reactions appear from the bottom-left of the meeting area
+        participants.add("rtk-reaction-overlay", {
             //@ts-ignore
             meeting: meeting,
         });
