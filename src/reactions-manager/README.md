@@ -3,6 +3,7 @@ A reactions feature that allows participants to send emoji reactions that appear
 
 ## Features
 - 6 default emoji reactions (👍, ❤️, 😂, 😮, 👏, 🎉)
+- Allows overriding emoji list
 - Floating animations that rise up from the participant tile
 - Real-time synchronization across all participants
 - Emoji Badge appears during PIP
@@ -14,8 +15,16 @@ A reactions feature that allows participants to send emoji reactions that appear
 ```ts
 import ReactionsManagerAddon from '@cloudflare/realtimekit-ui-addons/reactions-manager';
 
+// your custom set
+const CUSTOM_REACTIONS = [
+  { emoji: "🔥", label: "fire" },
+  { emoji: "😍", label: "love eyes" },
+  { emoji: "😢", label: "sad" },
+];
+
 const reactionsAddon = await ReactionsManagerAddon.init({
     meeting,
+    reactions: CUSTOM_REACTIONS,
     canSendReactions: true, // optional, defaults to true
 });
 ```
