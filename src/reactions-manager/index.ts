@@ -3,11 +3,10 @@ import { Meeting } from "@cloudflare/realtimekit-ui/dist/types/types/rtk-client"
 import { ReactionPicker, REACTIONS } from "./ReactionPicker";
 import ReactionOverlay from "./ReactionOverlay";
 import ReactionBadge from "./ReactionBadge";
-import RTKClient from "@cloudflare/realtimekit";
 
 export interface ReactionsManagerProps {
     canSendReactions?: boolean;
-    meeting: RTKClient;
+    meeting: Meeting;
     reactions?: typeof REACTIONS;
 }
 

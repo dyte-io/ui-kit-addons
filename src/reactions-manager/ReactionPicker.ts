@@ -1,7 +1,7 @@
 
 // svg string for reaction/emoji icon (smiling face)
 export const ReactionIcon =
-    '<svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm0 1a7 7 0 1 0 0 14 7 7 0 0 0 0-14ZM7.5 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm5 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM6.5 12a.5.5 0 0 1 .5.5 3 3 0 0 0 6 0 .5.5 0 0 1 1 0 4 4 0 0 1-8 0 .5.5 0 0 1 .5-.5Z" fill="currentColor"></path></svg>';
+    '<svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M4.111 2.18a7 7 0 1 1 7.778 11.64A7 7 0 0 1 4.11 2.18zm.556 10.809a6 6 0 1 0 6.666-9.978 6 6 0 0 0-6.666 9.978zM6.5 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm5 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM8 11a3 3 0 0 1-2.65-1.58l-.87.48a4 4 0 0 0 7.12-.16l-.9-.43A3 3 0 0 1 8 11z" fill="currentColor"></path></svg>';
 
 // Available reactions similar to Google Meet
 export const REACTIONS = [
