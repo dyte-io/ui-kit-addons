@@ -39,26 +39,17 @@ const OVERLAY_STYLES = `
 
 export default class ReactionOverlay extends HTMLElement {
     _shadowRoot = undefined;
-    _participant = undefined;
     _meeting = undefined;
     messageHandler = undefined;
 
     static get observedAttributes() {
-        return ["participant", "meeting"];
+        return ["meeting"];
     }
 
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ mode: "open" });
         this.handleReactionUpdate = this.handleReactionUpdate.bind(this);
-    }
-
-    get participant() {
-        return this._participant;
-    }
-
-    set participant(participant) {
-        this._participant = participant;
     }
 
     set meeting(meeting) {
@@ -70,12 +61,15 @@ export default class ReactionOverlay extends HTMLElement {
     }
 
     handleReactionUpdate({ type, payload }) {
-        // Only handle reaction messages for this participant
-        if (type === 'reaction' && payload.peerId === this.participant.id) {
-            this.showReaction(payload.emoji);
-        }
+        if (type !== 'reaction') return;
+
+        // Show a floating reaction for any participant's reaction
+        this.showReaction(payload.emoji);
+
+        // Update PIP source so per-participant badges can still reflect
+        // the last reaction for that participant
         const pip = this.meeting.participants.pip;
-        pip.updateSource && pip.updateSource(this.participant.id, {
+        pip.updateSource && pip.updateSource(payload.peerId, {
             reaction: payload.emoji
         });
     }
@@ -85,17 +79,24 @@ export default class ReactionOverlay extends HTMLElement {
         reactionEl.className = 'reaction-animation';
         reactionEl.textContent = emoji;
         
-        // Random starting position (bottom 20% of the tile, horizontally centered with slight variation)
-        const startX = 5 + (Math.random() * 10); // 5-15% from left
-        const startY = 80 + (Math.random() * 10); // 80-90% from top
+        // Start near the bottom-left of the overall meeting area with slight
+        // horizontal variation so multiple reactions can be seen together.
+        const startX = 2 + (Math.random() * 12); // 2-14% from left
         reactionEl.style.left = `${startX}%`;
-        reactionEl.style.top = `${startY}%`;
+        reactionEl.style.bottom = `5%`;
         
         // Random drift direction
         const driftX = (Math.random() - 0.5) * 50; // -25px to +25px
         reactionEl.style.setProperty('--drift-x', `${driftX}px`);
         
         this._shadowRoot.appendChild(reactionEl);
+
+        // Clean up the element once its animation finishes
+        reactionEl.addEventListener('animationend', () => {
+            if (reactionEl.parentNode) {
+                reactionEl.parentNode.removeChild(reactionEl);
+            }
+        });
     }
 
     connectedCallback() {

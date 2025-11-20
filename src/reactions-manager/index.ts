@@ -1,6 +1,6 @@
 import { RtkUiBuilder, UIConfig } from "@cloudflare/realtimekit-ui";
 import { Meeting } from "@cloudflare/realtimekit-ui/dist/types/types/rtk-client";
-import { ReactionPicker } from "./ReactionPicker";
+import { ReactionPicker, REACTIONS } from "./ReactionPicker";
 import ReactionOverlay from "./ReactionOverlay";
 import ReactionBadge from "./ReactionBadge";
 import RTKClient from "@cloudflare/realtimekit";
@@ -8,6 +8,7 @@ import RTKClient from "@cloudflare/realtimekit";
 export interface ReactionsManagerProps {
     canSendReactions?: boolean;
     meeting: RTKClient;
+    reactions?: typeof REACTIONS;
 }
 
 /**
@@ -26,9 +27,11 @@ export interface ReactionsManagerProps {
 
 class ReactionsManagerAddon {
     canSendReactions = true;
+    reactions = REACTIONS;
 
-    private constructor({ canSendReactions }: ReactionsManagerProps) {
+    private constructor({ canSendReactions, reactions }: ReactionsManagerProps) {
         this.canSendReactions = canSendReactions ?? true;
+        this.reactions = reactions && reactions.length ? reactions : REACTIONS;
         
         if (customElements.get("rtk-reaction-overlay")) return;
         customElements.define("rtk-reaction-overlay", ReactionOverlay);
@@ -41,10 +44,11 @@ class ReactionsManagerAddon {
     }
 
     static async init(
-        { meeting, canSendReactions = true }: ReactionsManagerProps
+        { meeting, canSendReactions = true, reactions }: ReactionsManagerProps
     ) {
         return new ReactionsManagerAddon({
             canSendReactions,
+            reactions,
             meeting,
         });
     }
@@ -57,11 +61,14 @@ class ReactionsManagerAddon {
         if (!controlBarLeft) return config;
         const controlBarMobile = builder.find("div#controlbar-mobile");
         if (!controlBarMobile) return config;
+        const participants = builder.find("rtk-stage");
+        if (!participants) return config;
         const participantTile = builder.find("rtk-participant-tile");
         if (!participantTile) return config;
 
-        // Add reaction overlay on participant tiles to show floating reactions
-        participantTile.add("rtk-reaction-overlay", {
+        // Add a single global reaction overlay on the participants container
+        // so that reactions appear from the bottom-left of the meeting area
+        participants.add("rtk-reaction-overlay", {
             //@ts-ignore
             meeting: meeting,
         });
@@ -77,11 +84,13 @@ class ReactionsManagerAddon {
             controlBarLeft.add("rtk-reaction-picker", {
                 //@ts-ignore
                 meeting: meeting,
-            });
+                reactions: this.reactions,
+            } as any);
             controlBarMobile.add("rtk-reaction-picker", {
                 //@ts-ignore
                 meeting: meeting,
-            });
+                reactions: this.reactions,
+            } as any);
         }
 
         // Return the updated config

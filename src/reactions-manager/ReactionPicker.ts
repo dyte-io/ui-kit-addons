@@ -24,8 +24,13 @@ const PICKER_STYLES = `
         border-radius: 12px;
         padding: 8px;
         display: flex;
+        flex-wrap: wrap;
         gap: 4px;
+        justify-content: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        min-width: 400px;
+        max-width: min(360px, 90vw);
+        box-sizing: border-box;
         z-index: 1000;
     }
 
@@ -60,6 +65,7 @@ const PICKER_STYLES = `
 export class ReactionPicker extends HTMLElement {
     shadow;
     _meeting = undefined;
+    _reactions = REACTIONS;
     pickerVisible = false;
 
     constructor() {
@@ -94,6 +100,14 @@ export class ReactionPicker extends HTMLElement {
 
     get meeting() {
         return this._meeting;
+    }
+
+    set reactions(reactions) {
+        this._reactions = Array.isArray(reactions) && reactions.length > 0 ? reactions : REACTIONS;
+    }
+
+    get reactions() {
+        return this._reactions;
     }
 
     togglePicker(event) {
@@ -144,7 +158,7 @@ export class ReactionPicker extends HTMLElement {
         const picker = document.createElement('div');
         picker.className = 'reaction-picker hidden';
         
-        REACTIONS.forEach(reaction => {
+        this.reactions.forEach(reaction => {
             const btn = document.createElement('button');
             btn.className = 'reaction-button';
             btn.textContent = reaction.emoji;
