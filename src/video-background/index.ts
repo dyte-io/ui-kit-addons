@@ -192,13 +192,13 @@ export default class VideoBGAddon {
 
     private async getRandomImages(count: number) {
         let images = [
-            'https://assets.dyte.io/backgrounds/bg_1.jpg',
-            'https://assets.dyte.io/backgrounds/bg_2.jpg',
-            'https://assets.dyte.io/backgrounds/bg_3.jpg',
-            'https://assets.dyte.io/backgrounds/bg_4.jpg',
-            'https://assets.dyte.io/backgrounds/bg_5.jpg',
-            'https://assets.dyte.io/backgrounds/bg_6.jpg',
-            'https://assets.dyte.io/backgrounds/bg_7.jpg',
+            'https://rtk-assets.realtime.cloudflare.com/backgrounds/bg_1.jpg',
+            'https://rtk-assets.realtime.cloudflare.com/backgrounds/bg_2.jpg',
+            'https://rtk-assets.realtime.cloudflare.com/backgrounds/bg_3.jpg',
+            'https://rtk-assets.realtime.cloudflare.com/backgrounds/bg_4.jpg',
+            'https://rtk-assets.realtime.cloudflare.com/backgrounds/bg_5.jpg',
+            'https://rtk-assets.realtime.cloudflare.com/backgrounds/bg_6.jpg',
+            'https://rtk-assets.realtime.cloudflare.com/backgrounds/bg_7.jpg',
         ];
 
         let randomCount = Math.min(images.length, count); // Currently only 7 backgrounds are hosted

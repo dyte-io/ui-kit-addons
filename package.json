@@ -1,6 +1,6 @@
 {
   "name": "@cloudflare/realtimekit-ui-addons",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "A collection of Cloudflare RealtimeKit UI addons",
   "type": "module",
   "exports": {
@@ -15,6 +15,12 @@
       "require": "./dist/hand-raise.cjs",
       "default": "./dist/hand-raise.cjs",
       "types": "./dist/esm/hand-raise/index.d.ts"
+    },
+     "./reactions-manager": {
+      "import": "./dist/reactions-manager.js",
+      "require": "./dist/reactions-manager.cjs",
+      "default": "./dist/reactions-manager.cjs",
+      "types": "./dist/esm/reactions-manager/index.d.ts"
     },
     "./video-background": {
       "import": "./dist/video-background.js",

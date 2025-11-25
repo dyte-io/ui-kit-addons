@@ -11,6 +11,7 @@ export default defineConfig({
     lib: {
       formats: ["cjs", "es"],
       entry: {
+        'reactions-manager': "./src/reactions-manager/index.ts",
         'custom-controlbar-button': "./src/custom-controlbar-button/index.ts",
         'hand-raise': "./src/hand-raise/index.ts",
         'video-background': "./src/video-background/index.ts",

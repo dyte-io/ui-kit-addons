@@ -39,24 +39,36 @@ This [repository](https://github.com/dyte-io/ui-kit-addons) contains all the ui-
 
 A comprehensive guide detailing the usage of these ui-kit addons is available [here](https://dyte.io/blog/ui-kit-add-ons/).
 
-## Samples
+## Examples
 
-Here are the list of available samples at the moment.
+Here are the list of available examples at the moment.
 
+### Host controls
 1. [Camera Host Control](./src/camera-host-control/)
-2. [Chat Host Control](./src/chat-host-control/)
-3. [Custom Controlbar button](./src/custom-controlbar-button/)
-4. [Hand Raise](./src/hand-raise/)
-5. [Mic Host Control](./src/mic-host-control/)
-6. [Participant Menu Item](./src/participant-menu-item/)
-7. [Participant Tile Menu](./src/participant-tile-menu/)
-8. [Participants Tab Action](./src/participants-tab-action/)
-9. [Participant Tab Toggle](./src/participants-tab-toggle/)
-10. [Video Background](./src/video-background/)
+2. [Mic Host Control](./src/mic-host-control/)
+3. [Chat Host Control](./src/chat-host-control/)
+
+### Reactions
+1. [Hand Raise](./src/hand-raise/)
+2. [Reactions](./src/reactions-manager/)
+
+### Participant Tile
+1. [Participant Tile Menu](./src/participant-tile-menu/)
+
+### Participants Tab Actions
+1. [Participant Menu Item](./src/participant-menu-item/)
+2. [Participants Tab Action](./src/participants-tab-action/)
+3. [Participants Tab Toggle](./src/participants-tab-toggle/)
+
+### Video Background
+1. [Video Background](./src/video-background/)
+
+### Control Bar
+1. [Custom Controlbar button](./src/custom-controlbar-button/)
 
 ## Usage
 
-To use these addons you would need to do the following steps:
+To use these addons you would need to perform the following steps:
 
 1. Install the addon package:
 
@@ -64,48 +76,49 @@ To use these addons you would need to do the following steps:
 npm install @cloudflare/realtimekit-ui-addons
 ```
 
-2. Import the addon that you need, for example:
-   `custom-controlbar-button`:
+2. Import the addons that you need.
 
 ```ts
+// Host controls
+import CameraHostControl from '@cloudflare/realtimekit-ui-addons/camera-host-control';
+import MicHostControl from '@cloudflare/realtimekit-ui-addons/mic-host-control';
+import ChatHostControl from '@cloudflare/realtimekit-ui-addons/chat-host-control';
+
+// Reactions
+import HandRaise from '@cloudflare/realtimekit-ui-addons/hand-raise';
+import ReactionsManagerAddon from '@cloudflare/realtimekit-ui-addons/reactions-manager';
+
+// Participant Tile
+import ParticipantTileMenu from "@cloudflare/realtimekit-ui-addons/participant-tile-menu";
+
+// Participant Tab Actions
+import ParticipantMenuItem from '@cloudflare/realtimekit-ui-addons/participant-menu-item';
+import ParticipantsTabAction from "@cloudflare/realtimekit-ui-addons/participants-tab-action";
+import ParticipantsTabToggle from "@cloudflare/realtimekit-ui-addons/participants-tab-toggle";
+
+// Video Background (Effects)
+import RealtimeKitVideoBackground from '@cloudflare/realtimekit-ui-addons/video-background';
+
+// Control bar button
 import CustomControlbarButton from '@cloudflare/realtimekit-ui-addons/custom-controlbar-button';
 ```
 
-3. Configure the addon
+3. Initialize the addons
 
 ```ts
-const myButton = new CustomControlbarButton({
-   position: 'left',
-   icon: svgIcon,
-   label: 'Click Me!',
-   onClick: () => alert('Clicked!')
-});
-```
-
-4. Register addon
-
-```ts
-import { registerAddons } from "@cloudflare/realtimekit-ui";
-...
-const newConfig = registerAddons([myButton], meeting);
-```
-
-5. Pass the config to meeting UI
-
-```
-<rtk-meeting meeting={meeting} config={newConfig}></rtk-meeting> 
-```
-
-Most of the addons such as HandRaise, Chat Host Control & Mic Host Control have been migrated to use an `async static init` method instead of the constructor, to utilise meeting store APIs, with async await.
-
-For all such addons, rather than calling their constructor, init method should be called.
-
-```tsx
-const handRaise = await HandRaise.init({
+// Host controls
+const cameraHostControl = await CameraHostControl.init({
     meeting,
-    canRaiseHand: true,
-    canManageRaisedHand: true,
-    handRaiseIcon: '<svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M4 12.02c0 1.06.2 2.1.6 3.08l.6 1.42c.22.55.64 1.01 1.17 1.29.27.14.56.21.86.21h2.55c.77 0 1.49-.41 1.87-1.08.5-.87 1.02-1.7 1.72-2.43l1.32-1.39c.44-.46.97-.84 1.49-1.23l.59-.45a.6.6 0 0 0 .23-.47c0-.75-.54-1.57-1.22-1.79a3.34 3.34 0 0 0-2.78.29V4.5a1.5 1.5 0 0 0-2.05-1.4 1.5 1.5 0 0 0-2.9 0A1.5 1.5 0 0 0 6 4.5v.09A1.5 1.5 0 0 0 4 6v6.02ZM8 4.5v4a.5.5 0 0 0 1 0v-5a.5.5 0 0 1 1 0v5a.5.5 0 0 0 1 0v-4a.5.5 0 0 1 1 0v6a.5.5 0 0 0 .85.37h.01c.22-.22.44-.44.72-.58.7-.35 2.22-.57 2.4.5l-.53.4c-.52.4-1.04.78-1.48 1.24l-1.33 1.38c-.75.79-1.31 1.7-1.85 2.63-.21.36-.6.58-1.01.58H7.23a.87.87 0 0 1-.4-.1 1.55 1.55 0 0 1-.71-.78l-.59-1.42a7.09 7.09 0 0 1-.53-2.7V6a.5.5 0 0 1 1 0v3.5a.5.5 0 0 0 1 0v-5a.5.5 0 0 1 1 0Z" fill="#ff0000"></path></svg>'
+    hostPresets: ['webinar_presenter'],
+    targetPresets: ['webinar_viewer'],
+    addActionInParticipantMenu: true,
+});
+
+const micHostControl = await MicHostControl.init({
+    meeting,
+    hostPresets: ['webinar_presenter'],
+    targetPresets: ['webinar_viewer'],
+    addActionInParticipantMenu: true,
 });
 
 const chatHostControl = await ChatHostControl.init({
@@ -116,36 +129,111 @@ const chatHostControl = await ChatHostControl.init({
 
 });
 
-const micHostControl = await MicHostControl.init({
+// Reactions
+const handRaise = await HandRaise.init({
     meeting,
-    hostPresets: ['webinar_presenter'],
-    targetPresets: ['webinar_viewer'],
-    addActionInParticipantMenu: true,
+    canRaiseHand: true,
+    canManageRaisedHand: true,
+    handRaiseIcon: '<svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M4 12.02c0 1.06.2 2.1.6 3.08l.6 1.42c.22.55.64 1.01 1.17 1.29.27.14.56.21.86.21h2.55c.77 0 1.49-.41 1.87-1.08.5-.87 1.02-1.7 1.72-2.43l1.32-1.39c.44-.46.97-.84 1.49-1.23l.59-.45a.6.6 0 0 0 .23-.47c0-.75-.54-1.57-1.22-1.79a3.34 3.34 0 0 0-2.78.29V4.5a1.5 1.5 0 0 0-2.05-1.4 1.5 1.5 0 0 0-2.9 0A1.5 1.5 0 0 0 6 4.5v.09A1.5 1.5 0 0 0 4 6v6.02ZM8 4.5v4a.5.5 0 0 0 1 0v-5a.5.5 0 0 1 1 0v5a.5.5 0 0 0 1 0v-4a.5.5 0 0 1 1 0v6a.5.5 0 0 0 .85.37h.01c.22-.22.44-.44.72-.58.7-.35 2.22-.57 2.4.5l-.53.4c-.52.4-1.04.78-1.48 1.24l-1.33 1.38c-.75.79-1.31 1.7-1.85 2.63-.21.36-.6.58-1.01.58H7.23a.87.87 0 0 1-.4-.1 1.55 1.55 0 0 1-.71-.78l-.59-1.42a7.09 7.09 0 0 1-.53-2.7V6a.5.5 0 0 1 1 0v3.5a.5.5 0 0 0 1 0v-5a.5.5 0 0 1 1 0Z" fill="#ff0000"></path></svg>'
 });
 
-const cameraHostControl = await CameraHostControl.init({
+const CUSTOM_REACTIONS = [
+    { emoji: "🔥", label: "fire" },
+    { emoji: "😢", label: "sad" },
+    { emoji: '👍', label: 'thumbs up' },
+    { emoji: '👎', label: 'thumbs down' },
+    { emoji: '❤️', label: 'heart' },
+    { emoji: '😂', label: 'laugh' },
+    { emoji: '👏', label: 'clap' },
+    { emoji: '🎉', label: 'celebrate' },
+];
+
+const reactionsAddon = await ReactionsManagerAddon.init({
     meeting,
-    hostPresets: ['webinar_presenter'],
-    targetPresets: ['webinar_viewer'],
-    addActionInParticipantMenu: true,
+    reactions: CUSTOM_REACTIONS,    
+    canSendReactions: true,
 });
 
-  const videoBackground = await RealtimeKitVideoBackground.init({
-      modes: ["blur", "virtual", "random"],
-      blurStrength: 30, // 0 - 100 for opacity
-      meeting,
-      images: [
-          "https://images.unsplash.com/photo-1487088678257-3a541e6e3922?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3",
-          "https://images.unsplash.com/photo-1496715976403-7e36dc43f17b?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3",
-          "https://images.unsplash.com/photo-1600431521340-491eca880813?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3"
-      ],
-      randomCount: 10,
-      onVideoBackgroundUpdate: ({backgroundMode, backgroundURL}) => { 
-        console.log('videoBackgroundUpdated => ', {backgroundMode, backgroundURL});
-      }, // Listen to background update action
-  });
+// Participant Tile
+const participantTileMenu = new ParticipantTileMenu([{
+    label: "Custom Toggle",
+    onClick: (participantId) => {
+    console.log('Clicked on custom toggle for ', participantId);
+    }
+}], 'top-right');
+
+// Participant Tab Actions
+const rightTickSVG = "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><path d='M4 12l6 6 10-14' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>";
+const participantMenuItem = new ParticipantMenuItem({
+    label: "Custom Menu Item",
+    icon: rightTickSVG,
+    styles: "rtk-icon { color: green !important; }",
+    onClick: () => {
+        alert('Participant Menu Item clicked');
+    }
+});
+
+const participantsTabAction = new ParticipantsTabAction({
+    onClick: () => {
+        alert("Clicked!");
+    },
+    label: "Click me",
+    position: "start"
+});
+
+// Participant Tab Toggle
+const participantsTabToggle = new ParticipantsTabToggle({
+  onEnabled: () => {
+    alert('toggled true!');
+  },
+  onDisabled: () => {
+    alert('toggled true!');
+  },
+  label: 'Click me',
+  initialValue: () => true,
+  position: 'start',
+});
+
+// Video Background (Effects)
+const videoBackground = await RealtimeKitVideoBackground.init({
+    modes: ["blur", "virtual", "random"],
+    blurStrength: 30, // 0 - 100 for opacity
+    meeting,
+    images: [
+        "https://images.unsplash.com/photo-1487088678257-3a541e6e3922?q=80&w=2874&auto=format&fit=crop&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1496715976403-7e36dc43f17b?q=80&w=2848&auto=format&fit=crop&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1600431521340-491eca880813?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3"
+    ],
+    randomCount: 10,
+    onVideoBackgroundUpdate: ({backgroundMode, backgroundURL}) => { 
+      console.log('videoBackgroundUpdated => ', {backgroundMode, backgroundURL});
+    }, // Listen to background update action
+});
+
+// Control Bar
+const customControlBarButton = new CustomControlbarButton({
+   position: 'left',
+   icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 17.75a1.25 1.25 0 1 1 0 2.5a1.25 1.25 0 0 1 0-2.5zM12 14c0-2.5 4-2.5 4-6a4 4 0 1 0-8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>',
+   label: 'Click Me!',
+   onClick: () => alert('Custom Control Bar Button Clicked'),
+});
 ```
 
+4. Register addon
+
+```ts
+import { registerAddons } from "@cloudflare/realtimekit-ui";
+...
+const newConfig = registerAddons([cameraHostControl, micHostControl, chatHostControl, handRaise, reactionsAddon, participantTileMenu, participantMenuItem, participantsTabAction, participantsTabToggle, videoBackground, customControlBarButton], meeting);
+```
+
+5. Pass the config to meeting UI
+
+```
+<rtk-meeting meeting={meeting} config={newConfig}></rtk-meeting> 
+```
+
+### Video Background
 you can apply, replace, or remove a background programmatically.
 
 ```tsx
@@ -162,4 +250,4 @@ This project is created & maintained by Cloudflare, Inc.
 
 The names and logos for Cloudflare are trademarks of Cloudflare, Inc.
 
-We love open source software! See [our other projects](https://github.com/dyte-io) and [our products](https://dyte.io).
+We love open source software! See [our other projects](https://github.com/cloudflare) and [our products](https://cloudflare.com).
