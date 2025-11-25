@@ -26,7 +26,7 @@ export interface ParticipantTabToggleArgs {
  * @returns {UIConfig} modified config
  *
  * @example
- *  action = new ParticipantTabAction({
+ *  action = new ParticipantTabToggle({
  *     onEnabled: () => {
  *       alert('toggled true!');
  *     },
