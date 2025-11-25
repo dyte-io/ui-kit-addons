@@ -61,6 +61,12 @@ export default class ReactionBadge extends HTMLElement {
     }
 
     updateContent() {
+        // Update PIP source so per-participant badges can still reflect
+        // the last reaction for that participant
+        const pip = this.meeting.participants.pip;
+        pip.updateSource && pip.updateSource(this._participant.id, {
+            reaction: this._currentReaction
+        });
         this._shadowRoot.innerHTML = `
             <style>
                 :host {

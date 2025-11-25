@@ -65,16 +65,9 @@ export default class ReactionOverlay extends HTMLElement {
 
         // Show a floating reaction for any participant's reaction
         this.showReaction(payload.emoji);
-
-        // Update PIP source so per-participant badges can still reflect
-        // the last reaction for that participant
-        const pip = this.meeting.participants.pip;
-        pip.updateSource && pip.updateSource(payload.peerId, {
-            reaction: payload.emoji
-        });
     }
 
-    showReaction(emoji: string) {
+    showReaction(emoji: string ) {
         const reactionEl = document.createElement('div');
         reactionEl.className = 'reaction-animation';
         reactionEl.textContent = emoji;
@@ -88,7 +81,6 @@ export default class ReactionOverlay extends HTMLElement {
         // Random drift direction
         const driftX = (Math.random() - 0.5) * 50; // -25px to +25px
         reactionEl.style.setProperty('--drift-x', `${driftX}px`);
-        
         this._shadowRoot.appendChild(reactionEl);
 
         // Clean up the element once its animation finishes
