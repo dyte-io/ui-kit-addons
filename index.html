@@ -7,15 +7,17 @@
             content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"
         />
         <title>RealtimeKit UI Addons</title>
+        <script src="https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit@latest/dist/browser.js"></script>
     </head>
     <body>
         <div id="root">
             <rtk-meeting id="meeting"></rtk-meeting>
         </div>
         <script type="module">
-            import RealtimeKitClient from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit@1.0.1/dist/index.es.js";
-            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@1.0.1/loader/index.es2017.js";
-            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@1.0.1/dist/esm/index.js";
+            // FIXME(ravindra-cloudflare): uuid import is missing. RealtimeKit import is failing. Using browser.js for now
+            // import RealtimeKitClient from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit@staging/dist/index.es.js";
+            import { defineCustomElements } from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@latest/loader/index.es2017.js";
+            import { registerAddons } from "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@latest/dist/esm/index.js";
 
             // Import addons
             import RealtimeKitVideoBackground from "/src/video-background/index.ts";
